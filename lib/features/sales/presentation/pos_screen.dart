@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_routes.dart';
 import '../../../core/navigation/kpms_breakpoints.dart';
+import '../../../core/responsive/responsive_helpers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/kpms_feedback.dart';
 import '../../../core/widgets/glass_card.dart';
@@ -89,7 +91,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       kpmsSnack(context, 'Could not add line', isError: true);
       return;
     }
-    HapticFeedback.lightImpact();
+    if (!kIsWeb) {
+      HapticFeedback.lightImpact();
+    }
     kpmsSnack(context, '${m.name} added to cart');
   }
 
@@ -181,8 +185,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final wide = width >= 1024;
+    final wide = isPosSplitLayout(context);
     final meds = ref.watch(medicineCatalogProvider);
     final cart = ref.watch(posCartProvider);
     final notifier = ref.read(posCartProvider.notifier);
@@ -213,7 +216,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 280),
                 curve: Curves.easeOutCubic,
-                width: _cartRailExpanded ? 392 : 56,
+                width: _cartRailExpanded ? 420 : 56,
                 child: ClipRect(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -301,6 +304,31 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 }
 
+/// Grid column count + aspect ratio from actual catalog column width (fixes clipped Quick add on web).
+({int cross, double aspect}) _posGridLayout(double catalogW, double pad) {
+  const gap = 14.0;
+  final int cross;
+  if (catalogW < 280) {
+    cross = 1;
+  } else if (isDesktopWidth(catalogW)) {
+    if (catalogW >= 720) {
+      cross = 4;
+    } else if (catalogW >= 520) {
+      cross = 3;
+    } else {
+      cross = 2;
+    }
+  } else {
+    cross = 2;
+  }
+  final totalGap = gap * (cross - 1);
+  final cellW = (catalogW - pad * 2 - totalGap) / cross;
+  const targetH = 212.0;
+  final raw = math.max(1.0, cellW) / targetH;
+  final aspect = cross == 1 ? math.max(raw, 1.12) : math.max(raw, 0.52);
+  return (cross: cross, aspect: aspect);
+}
+
 class _PosCatalogPane extends StatelessWidget {
   const _PosCatalogPane({
     required this.controller,
@@ -321,28 +349,23 @@ class _PosCatalogPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final pad = KpmsBreakpoints.pagePaddingHorizontal(MediaQuery.sizeOf(context).width);
-    final w = MediaQuery.sizeOf(context).width;
-    // Max 2 columns — compact cards fit without overflow; single column on very narrow widths.
-    final gridCross = w >= 280 ? 2 : 1;
-    final approxCellW = gridCross == 2 ? (w - pad * 2 - 14) / 2 : w - pad * 2;
-    // `childAspectRatio` = cross-axis / main-axis = width / height for a vertical grid.
-    // Never cap the *maximum* ratio: e.g. max=2.2 with a very wide cell makes height = w/2.2 huge
-    // (tens of thousands of px) → RenderFlex overflow. Instead: aspect ≈ width/targetHeight
-    // with only a *minimum* ratio so narrow cells stay tall enough for content.
-    const targetTileH = 198.0;
-    final safeCellW = math.max(1.0, approxCellW);
-    final rawAspect = safeCellW / targetTileH;
-    final gridAspect = gridCross == 1
-        ? math.max(rawAspect, 1.12)
-        : math.max(rawAspect, 0.58);
+    final viewportW = MediaQuery.sizeOf(context).width;
+    final pad = KpmsBreakpoints.pagePaddingHorizontal(viewportW);
+    final animateTiles = isMobile(context);
 
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: CustomScrollView(
-        primary: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final catalogW = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : viewportW;
+        final grid = _posGridLayout(catalogW, pad);
+
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: kIsWeb),
+          child: CustomScrollView(
+            primary: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
           SliverPadding(
             padding: EdgeInsets.fromLTRB(pad, 14, pad, 10),
             sliver: SliverToBoxAdapter(
@@ -447,26 +470,33 @@ class _PosCatalogPane extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(pad, 0, pad, 24),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: gridCross,
+                    crossAxisCount: grid.cross,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
-                    childAspectRatio: gridAspect,
+                    childAspectRatio: grid.aspect,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     childCount: medicines.length,
-                    (context, i) => TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0, end: 1),
-                      duration: Duration(milliseconds: 220 + (i % 5) * 28),
-                      curve: Curves.easeOutCubic,
-                      builder: (context, t, child) => Opacity(
-                        opacity: t,
-                        child: Transform.translate(
-                          offset: Offset(0, 10 * (1 - t)),
-                          child: child,
+                    (context, i) {
+                      final card = _PosGridProductCard(
+                        medicine: medicines[i],
+                        onAdd: () => onPick(medicines[i]),
+                      );
+                      if (!animateTiles) return card;
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: 1),
+                        duration: Duration(milliseconds: 220 + (i % 5) * 28),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, t, child) => Opacity(
+                          opacity: t,
+                          child: Transform.translate(
+                            offset: Offset(0, 10 * (1 - t)),
+                            child: child,
+                          ),
                         ),
-                      ),
-                      child: _PosGridProductCard(medicine: medicines[i], onAdd: () => onPick(medicines[i])),
-                    ),
+                        child: card,
+                      );
+                    },
                   ),
                 ),
               )
@@ -483,198 +513,243 @@ class _PosCatalogPane extends StatelessWidget {
                 ),
               ),
           ],
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
-class _PosGridProductCard extends StatelessWidget {
+class _PosGridProductCard extends StatefulWidget {
   const _PosGridProductCard({required this.medicine, required this.onAdd});
 
   final Medicine medicine;
   final VoidCallback onAdd;
 
   @override
+  State<_PosGridProductCard> createState() => _PosGridProductCardState();
+}
+
+class _PosGridProductCardState extends State<_PosGridProductCard> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = MedicineTypeStyle.resolve(medicine);
-    final profit = medicine.sellingPrice - medicine.buyingPrice;
-    final low = medicine.isLowStock;
+    final style = MedicineTypeStyle.resolve(widget.medicine);
+    final profit = widget.medicine.sellingPrice - widget.medicine.buyingPrice;
+    final low = widget.medicine.isLowStock;
     final outline = theme.colorScheme.outline.withValues(alpha: low ? 0.45 : 0.14);
+    final enableHover = !isMobile(context);
 
-    return Material(
+    Widget card = Material(
       elevation: 0,
-      shadowColor: style.accent.withValues(alpha: 0.18),
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onAdd,
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: theme.colorScheme.surface,
-            border: Border.all(color: outline),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.35 : 0.06),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      clipBehavior: Clip.antiAlias,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: theme.colorScheme.surface,
+          border: Border.all(
+            color: _hover && enableHover ? AppColors.primary.withValues(alpha: 0.45) : outline,
+            width: _hover && enableHover ? 1.5 : 1,
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 9),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: medicine.imageBytes != null
-                            ? Image.memory(medicine.imageBytes!, fit: BoxFit.cover)
-                            : DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      style.softBg,
-                                      style.accent.withValues(alpha: 0.22),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.35 : 0.06),
+              blurRadius: _hover && enableHover ? 18 : 12,
+              offset: Offset(0, _hover && enableHover ? 8 : 4),
+            ),
+            if (_hover && enableHover)
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onAdd,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: widget.medicine.imageBytes != null
+                                    ? Image.memory(widget.medicine.imageBytes!, fit: BoxFit.cover)
+                                    : DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              style.softBg,
+                                              style.accent.withValues(alpha: 0.22),
+                                            ],
+                                          ),
+                                        ),
+                                        child: Icon(style.icon, size: 26, color: style.accent),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.medicine.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.2,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          widget.medicine.typeDisplayName,
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: theme.hintColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(999),
+                                          color: low
+                                              ? Colors.orange.withValues(alpha: 0.18)
+                                              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
+                                          border: Border.all(
+                                            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Stock ${widget.medicine.quantity}',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ),
-                                child: Icon(style.icon, size: 26, color: style.accent),
+                                  if ((widget.medicine.barcode ?? '').isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      widget.medicine.barcode!,
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: theme.hintColor.withValues(alpha: 0.9),
+                                        fontFeatures: const [FontFeature.tabularFigures()],
+                                        fontSize: 10,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ],
                               ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            medicine.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              height: 1.2,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  medicine.typeDisplayName,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.hintColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(999),
-                                  color: low
-                                      ? Colors.orange.withValues(alpha: 0.18)
-                                      : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
-                                  border: Border.all(
-                                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Stock ${medicine.quantity}',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if ((medicine.barcode ?? '').isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              medicine.barcode!,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.hintColor.withValues(alpha: 0.9),
-                                fontFeatures: const [FontFeature.tabularFigures()],
-                                fontSize: 10,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _PosGridPriceCell(
-                        label: 'Sell',
-                        value: medicine.sellingPrice,
-                        accent: AppColors.primary,
-                        emphasized: true,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _PosGridPriceCell(
-                        label: 'Buy',
-                        value: medicine.buyingPrice,
-                        accent: theme.colorScheme.onSurfaceVariant,
-                        emphasized: false,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    'Margin +\$${profit.toStringAsFixed(2)}',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.tertiary,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _PosGridPriceCell(
+                                label: 'Sell',
+                                value: widget.medicine.sellingPrice,
+                                accent: AppColors.primary,
+                                emphasized: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _PosGridPriceCell(
+                                label: 'Buy',
+                                value: widget.medicine.buyingPrice,
+                                accent: theme.colorScheme.onSurfaceVariant,
+                                emphasized: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            'Margin +\$${profit.toStringAsFixed(2)}',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: AppColors.tertiary,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                SizedBox(
-                  height: 36,
-                  child: FilledButton.tonal(
-                    onPressed: onAdd,
-                    style: FilledButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 36),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Quick add'),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: SizedBox(
+                height: 38,
+                width: double.infinity,
+                child: FilledButton.tonal(
+                  onPressed: widget.onAdd,
+                  style: FilledButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 38),
+                    tapTargetSize: MaterialTapTargetSize.padded,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Quick add'),
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+
+    if (!enableHover) return card;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: _hover ? 1.02 : 1.0,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        child: card,
       ),
     );
   }
@@ -839,6 +914,191 @@ class _PosCartPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (isMobile(context)) {
+      return _PosCartPanelMobile(
+        onCheckout: onCheckout,
+        onReturns: onReturns,
+        onEditSell: onEditSell,
+      );
+    }
+
+    final theme = Theme.of(context);
+    final desktop = isDesktop(context);
+    final double pad = desktop
+        ? 16
+        : KpmsBreakpoints.pagePaddingHorizontal(MediaQuery.sizeOf(context).width).clamp(8.0, 18.0);
+    final lines = ref.watch(posCartProvider);
+    final notifier = ref.read(posCartProvider.notifier);
+
+    final subtotal = notifier.subtotal;
+    final profit = notifier.totalProfit;
+    final tax = subtotal * _taxRate;
+    final grand = subtotal + tax;
+    final border = theme.colorScheme.outline.withValues(alpha: theme.brightness == Brightness.dark ? 0.22 : 0.32);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        border: Border(left: BorderSide(color: border)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Material(
+            color: theme.colorScheme.surface,
+            elevation: desktop ? 2 : 0,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(pad, 14, pad, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.receipt_long_rounded, color: AppColors.primary, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Invoice', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+                        Text(
+                          'Live cart · ${notifier.itemCount} item${notifier.itemCount == 1 ? '' : 's'}',
+                          style: theme.textTheme.labelSmall?.copyWith(color: theme.hintColor, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Chip(
+                    label: Text('${notifier.itemCount}'),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                    labelStyle: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: kIsWeb),
+              child: lines.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(pad),
+                        child: Text(
+                          'Add products from the catalog.',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      primary: false,
+                      padding: EdgeInsets.fromLTRB(pad, 12, pad, 12),
+                      itemCount: lines.length,
+                      itemBuilder: (context, i) => RepaintBoundary(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _PosCartLineTile(
+                            line: lines[i],
+                            onEditSell: () => onEditSell(lines[i]),
+                            onRemove: () => ref.read(posCartProvider.notifier).remove(lines[i].id),
+                            onQty: (q) => ref.read(posCartProvider.notifier).setQuantity(lines[i].id, q),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          Material(
+            color: theme.colorScheme.surface,
+            elevation: desktop ? 6 : 0,
+            shadowColor: Colors.black.withValues(alpha: 0.12),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(pad, 12, pad, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _totRow(theme, 'Subtotal', '\$${subtotal.toStringAsFixed(2)}'),
+                  _totRow(theme, 'Est. profit', '\$${profit.toStringAsFixed(2)}', profit: true),
+                  _totRow(theme, 'Tax (${(_taxRate * 100).toStringAsFixed(0)}%)', '\$${tax.toStringAsFixed(2)}'),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Grand total', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: Text(
+                          '\$${grand.toStringAsFixed(2)}',
+                          key: ValueKey(grand),
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  FilledButton.icon(
+                    onPressed: lines.isEmpty ? null : onCheckout,
+                    icon: const Icon(Icons.shopping_bag_outlined),
+                    label: const Text('Continue to checkout'),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: onReturns,
+                    icon: const Icon(Icons.assignment_return_outlined),
+                    label: const Text('Returns & refunds'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _totRow(ThemeData theme, String a, String b, {bool profit = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(a, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
+          Text(
+            b,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: profit ? AppColors.tertiary : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Mobile cart sheet — unchanged layout from pre-web polish.
+class _PosCartPanelMobile extends ConsumerWidget {
+  const _PosCartPanelMobile({
+    required this.onCheckout,
+    required this.onReturns,
+    required this.onEditSell,
+  });
+
+  final VoidCallback onCheckout;
+  final VoidCallback onReturns;
+  final void Function(CartLine line) onEditSell;
+
+  static const _taxRate = 0.05;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final pad = KpmsBreakpoints.pagePaddingHorizontal(MediaQuery.sizeOf(context).width);
     final lines = ref.watch(posCartProvider);
@@ -967,9 +1227,9 @@ class _PosCartPanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _totRow(theme, 'Subtotal', '\$${subtotal.toStringAsFixed(2)}'),
-          _totRow(theme, 'Est. profit', '\$${profit.toStringAsFixed(2)}', profit: true),
-          _totRow(theme, 'Tax (${(_taxRate * 100).toStringAsFixed(0)}%)', '\$${tax.toStringAsFixed(2)}'),
+          _PosCartPanel._totRow(theme, 'Subtotal', '\$${subtotal.toStringAsFixed(2)}'),
+          _PosCartPanel._totRow(theme, 'Est. profit', '\$${profit.toStringAsFixed(2)}', profit: true),
+          _PosCartPanel._totRow(theme, 'Tax (${(_taxRate * 100).toStringAsFixed(0)}%)', '\$${tax.toStringAsFixed(2)}'),
           const Divider(height: 22),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -994,22 +1254,139 @@ class _PosCartPanel extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _totRow(ThemeData theme, String a, String b, {bool profit = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(a, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
-          Text(
-            b,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: profit ? AppColors.tertiary : null,
+class _PosCartLineTile extends StatelessWidget {
+  const _PosCartLineTile({
+    required this.line,
+    required this.onEditSell,
+    required this.onRemove,
+    required this.onQty,
+  });
+
+  final CartLine line;
+  final VoidCallback onEditSell;
+  final VoidCallback onRemove;
+  final void Function(int qty) onQty;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bad = line.priceViolatesFloor;
+    final outline = theme.colorScheme.outline.withValues(alpha: 0.2);
+
+    return Material(
+      color: theme.colorScheme.surface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: outline),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    line.name,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: bad ? Colors.red.shade700 : null,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                  onPressed: onRemove,
+                ),
+              ],
             ),
-          ),
-        ],
+            Text(
+              'Buy \$${line.unitBuy.toStringAsFixed(2)}',
+              style: theme.textTheme.labelSmall?.copyWith(color: theme.hintColor),
+            ),
+            InkWell(
+              onTap: onEditSell,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Text(
+                      'Sell \$${line.unitSell.toStringAsFixed(2)}',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: bad ? Colors.red.shade700 : AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.edit_rounded, size: 16, color: theme.hintColor),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+                border: Border.all(color: outline),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => onQty(line.quantity - 1),
+                    icon: const Icon(Icons.remove_rounded, size: 20),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      '${line.quantity}',
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => onQty(line.quantity + 1),
+                    icon: const Icon(Icons.add_rounded, size: 20),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Line \$${line.lineSubtotal.toStringAsFixed(2)}',
+                  style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                Text(
+                  'Profit \$${line.lineProfit.toStringAsFixed(2)}',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: AppColors.tertiary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            if (bad)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  'Selling below cost — blocked at checkout.',
+                  style: theme.textTheme.labelSmall?.copyWith(color: Colors.red.shade700),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -33,3 +33,8 @@ bool isTabletWidth(double width) =>
     width >= ResponsiveBreakpoints.mobile && width < ResponsiveBreakpoints.desktop;
 
 bool isDesktopWidth(double width) => width >= ResponsiveBreakpoints.desktop;
+
+/// POS split catalog + sticky cart rail (desktop web only).
+bool isPosSplitLayout(BuildContext context) => isDesktop(context);
+
+bool isPosSplitLayoutWidth(double width) => isDesktopWidth(width);
