@@ -5,6 +5,7 @@ import '../../../features/enterprise/application/medicine_categories_notifier.da
 import '../../../features/enterprise/application/pharmacy_enterprise_providers.dart';
 import '../../../features/enterprise/application/pharmacy_expenses_notifier.dart';
 import '../../../features/enterprise/application/product_barcodes_notifier.dart';
+import '../../../features/medicines/application/pending_medicine_deletions_notifier.dart';
 import '../../../features/medicines/data/medicine_catalog_notifier.dart';
 import '../../../features/pharmacy_cloud/application/pharmacy_cloud_providers.dart';
 import '../../../features/purchases/application/purchase_ledger_notifier.dart';
@@ -65,6 +66,7 @@ abstract final class KpmsSyncOutboxProcessor {
         try {
           if (_isWorkspaceFamily(row.entityType)) {
             KpmsSyncLog.uploadStarted(tenantId: '${tid}_outbox');
+            final pendingDeletes = List<String>.from(ref.read(pendingMedicineDeletionsProvider));
             await ref.read(pharmacyWorkspaceSyncServiceProvider).pushToCloud(
                   tenantId: tid,
                   medicines: ref.read(medicineCatalogProvider),
@@ -72,7 +74,11 @@ abstract final class KpmsSyncOutboxProcessor {
                   purchases: ref.read(purchaseLedgerProvider),
                   debtCustomers: ref.read(debtCustomersProvider),
                   suppliers: ref.read(suppliersProvider),
+                  deletedMedicineClientIds: pendingDeletes,
                 );
+            if (pendingDeletes.isNotEmpty) {
+              await ref.read(pendingMedicineDeletionsProvider.notifier).clearIds(pendingDeletes);
+            }
             await KpmsSyncOutboxService.clearPendingBulkForTenant(tid, entityType: KpmsSyncEntityType.workspace);
             await KpmsSyncOutboxService.deleteRow(row.id);
             KpmsSyncLog.uploadSuccess(tenantId: tid);

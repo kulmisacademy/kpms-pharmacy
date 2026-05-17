@@ -134,6 +134,7 @@ class PharmacyWorkspaceSyncService {
     required PurchaseLedgerState purchases,
     required List<DebtCustomer> debtCustomers,
     required List<Supplier> suppliers,
+    List<String> deletedMedicineClientIds = const [],
   }) async {
     try {
       await _cloud.pushWorkspace(
@@ -144,6 +145,9 @@ class PharmacyWorkspaceSyncService {
         debtCustomers: debtCustomers,
         suppliers: suppliers,
       );
+      if (deletedMedicineClientIds.isNotEmpty) {
+        await _cloud.deleteMedicines(tenantId, deletedMedicineClientIds);
+      }
       await markMigrated(tenantId);
     } catch (e, st) {
       debugPrint('PharmacyWorkspaceSyncService.push failed: $e\n$st');

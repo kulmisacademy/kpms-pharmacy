@@ -17,6 +17,8 @@ abstract final class KpmsNotificationKind {
   static const salesMilestone = 'sales_milestone';
   static const saleCompleted = 'sale_completed';
   static const medicineAdded = 'medicine_added';
+  static const medicineUpdated = 'medicine_updated';
+  static const medicineDeleted = 'medicine_deleted';
   static const expenseAdded = 'expense_added';
   static const syncCompleted = 'sync_completed';
 
@@ -28,7 +30,7 @@ abstract final class KpmsNotificationKind {
         subscriptionWarning => 'Subscription',
         staffLargeRefund || staffSuspicious || staffPermissionUpdated => 'Staff',
         salesMilestone || saleCompleted => 'Sales',
-        medicineAdded => 'Inventory',
+        medicineAdded || medicineUpdated || medicineDeleted => 'Inventory',
         expenseAdded => 'Finance',
         syncCompleted => 'Sync',
         _ => 'Other',

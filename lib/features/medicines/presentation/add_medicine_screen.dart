@@ -12,6 +12,7 @@ import '../../../core/utils/kpms_feedback.dart';
 import '../../../core/widgets/kpms_keyboard_aware_scroll.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
 import '../../notifications/application/kpms_pharmacy_success_notifications.dart';
+import '../application/medicine_catalog_service.dart';
 import '../../barcode/domain/barcode_scan_pop_result.dart';
 import '../data/custom_form_labels_notifier.dart';
 import '../data/medicine_catalog_notifier.dart';
@@ -21,10 +22,13 @@ import '../domain/medicine_type_style.dart';
 
 /// Full “Add medicine” flow — wire fields to Supabase insert later.
 class AddMedicineScreen extends ConsumerStatefulWidget {
-  const AddMedicineScreen({super.key, this.initialBarcode});
+  const AddMedicineScreen({super.key, this.initialBarcode, this.editMedicineId});
 
   /// Prefill from barcode scanner route (`?barcode=`).
   final String? initialBarcode;
+
+  /// When set, form opens in edit mode for an existing catalog SKU (`?id=`).
+  final String? editMedicineId;
 
   @override
   ConsumerState<AddMedicineScreen> createState() => _AddMedicineScreenState();
@@ -44,6 +48,10 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
   DateTime? _expiry;
   Uint8List? _imageBytes;
   String _typeTag = MedicineFormType.tablet.name;
+  Medicine? _editing;
+  bool _loadedEdit = false;
+
+  bool get _isEdit => widget.editMedicineId != null && widget.editMedicineId!.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -52,6 +60,32 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
     if (b != null && b.isNotEmpty) {
       _barcode.text = b;
     }
+  }
+
+  void _applyMedicineToForm(Medicine m) {
+    _editing = m;
+    _name.text = m.name;
+    _qty.text = '${m.quantity}';
+    _buy.text = m.buyingPrice.toStringAsFixed(2);
+    _sell.text = m.sellingPrice.toStringAsFixed(2);
+    _minStock.text = '${m.minimumStockAlert}';
+    _batch.text = m.batchCode ?? '';
+    _barcode.text = m.barcode ?? '';
+    _expiry = m.expiryDate;
+    _imageBytes = m.imageBytes;
+    if (m.formType == MedicineFormType.other && (m.customFormLabel?.isNotEmpty ?? false)) {
+      final label = m.customFormLabel!.trim();
+      final custom = ref.read(customFormLabelsProvider);
+      if (custom.contains(label)) {
+        _typeTag = 'custom:$label';
+      } else {
+        _typeTag = 'other_specify';
+        _otherSpecify.text = label;
+      }
+    } else {
+      _typeTag = m.formType.name;
+    }
+    _loadedEdit = true;
   }
 
   @override
@@ -146,6 +180,45 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
       return;
     }
 
+    final batch = _batch.text.trim().isEmpty ? null : _batch.text.trim();
+    final barcode = _barcode.text.trim().isEmpty ? null : _barcode.text.trim();
+
+    if (_isEdit) {
+      final existing = _editing ?? ref.read(medicineCatalogProvider.notifier).byId(widget.editMedicineId!.trim());
+      if (existing == null) {
+        kpmsSnack(context, 'Medicine not found', isError: true);
+        if (mounted) context.pop();
+        return;
+      }
+      final previous = {
+        'name': existing.name,
+        'quantity': existing.quantity,
+        'buying_price': existing.buyingPrice,
+        'selling_price': existing.sellingPrice,
+      };
+      final med = existing.copyWith(
+        name: name,
+        expiryDate: _expiry,
+        formType: resolved.$1,
+        customFormLabel: resolved.$2,
+        quantity: qty,
+        buyingPrice: buy,
+        sellingPrice: sell,
+        minimumStockAlert: minS,
+        imageBytes: _imageBytes,
+        batchCode: batch,
+        barcode: barcode,
+        clearExpiry: _expiry == null && existing.expiryDate != null,
+        clearBarcode: barcode == null && existing.barcode != null,
+        clearCustomLabel: resolved.$2 == null && existing.customFormLabel != null,
+      );
+      ref.read(medicineCatalogProvider.notifier).updateMedicine(med);
+      kpmsSnack(context, '${med.name} updated');
+      unawaited(MedicineCatalogService.recordMedicineUpdated(ref, med, previous: previous));
+      if (mounted) context.pop();
+      return;
+    }
+
     final id = 'med_${DateTime.now().millisecondsSinceEpoch}';
     final med = Medicine(
       id: id,
@@ -158,8 +231,8 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
       sellingPrice: sell,
       minimumStockAlert: minS,
       imageBytes: _imageBytes,
-      batchCode: _batch.text.trim().isEmpty ? null : _batch.text.trim(),
-      barcode: _barcode.text.trim().isEmpty ? null : _barcode.text.trim(),
+      batchCode: batch,
+      barcode: barcode,
     );
 
     ref.read(medicineCatalogProvider.notifier).addMedicine(med);
@@ -176,6 +249,22 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final custom = ref.watch(customFormLabelsProvider);
+
+    if (_isEdit && !_loadedEdit) {
+      final med = ref.read(medicineCatalogProvider.notifier).byId(widget.editMedicineId!.trim());
+      if (med != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _loadedEdit) return;
+          setState(() => _applyMedicineToForm(med));
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          kpmsSnack(context, 'Medicine not found', isError: true);
+          context.pop();
+        });
+      }
+    }
 
     final previewMedicine = Medicine(
       id: 'preview',
@@ -198,8 +287,8 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
     ];
 
     return KpmsPageShell(
-      title: 'Add medicine',
-      subtitle: 'Stock · pricing · presentation',
+      title: _isEdit ? 'Edit medicine' : 'Add medicine',
+      subtitle: _isEdit ? 'Update catalog · pricing · stock' : 'Stock · pricing · presentation',
       body: Form(
         key: _formKey,
         child: KpmsKeyboardAwareScroll(
@@ -509,7 +598,7 @@ class _AddMedicineScreenState extends ConsumerState<AddMedicineScreen> {
                 ),
                 onPressed: _submit,
                 icon: const Icon(Icons.save_rounded),
-                label: const Text('Save medicine'),
+                label: Text(_isEdit ? 'Save changes' : 'Save medicine'),
               ),
             ],
           ),

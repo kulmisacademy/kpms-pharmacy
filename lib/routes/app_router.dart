@@ -325,7 +325,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'addMedicine',
         pageBuilder: (context, state) => kpmsSlideFadePage(
           state,
-          AddMedicineScreen(initialBarcode: state.uri.queryParameters['barcode']),
+          AddMedicineScreen(
+            initialBarcode: state.uri.queryParameters['barcode'],
+            editMedicineId: state.uri.queryParameters['id'],
+          ),
         ),
       ),
       GoRoute(

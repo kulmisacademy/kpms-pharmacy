@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/kpms_inventory_permission_provider.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/navigation/kpms_breakpoints.dart';
 import '../../../core/responsive/responsive_helpers.dart';
@@ -18,6 +19,7 @@ import '../../enterprise/application/product_barcodes_notifier.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
 import '../../medicines/domain/medicine.dart';
 import '../../medicines/domain/medicine_type_style.dart';
+import '../../medicines/presentation/widgets/medicine_manage_actions.dart';
 import '../application/pos_cart_notifier.dart';
 import '../domain/cart_line.dart';
 
@@ -193,6 +195,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final q = _search.text.trim().toLowerCase();
     final filtered = meds.where((m) => _medicineMatchesQuery(m, q)).toList();
 
+    final canManageCatalog = ref.watch(kpmsCanManageInventoryProvider);
     final catalog = _PosCatalogPane(
       controller: _search,
       viewMode: _viewMode,
@@ -200,6 +203,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       onChanged: () => setState(() {}),
       medicines: filtered,
       onPick: _tryAddMedicine,
+      canManage: canManageCatalog,
+      onEditMedicine: (m) => context.push(MedicineManageActions.editRouteFor(m)),
+      onDeleteMedicine: (m) => MedicineManageActions.confirmAndDelete(context, ref, m),
     );
 
     final cartPanel = _PosCartPanel(
@@ -337,6 +343,9 @@ class _PosCatalogPane extends StatelessWidget {
     required this.onChanged,
     required this.medicines,
     required this.onPick,
+    required this.canManage,
+    required this.onEditMedicine,
+    required this.onDeleteMedicine,
   });
 
   final TextEditingController controller;
@@ -345,6 +354,9 @@ class _PosCatalogPane extends StatelessWidget {
   final VoidCallback onChanged;
   final List<Medicine> medicines;
   final void Function(Medicine m) onPick;
+  final bool canManage;
+  final void Function(Medicine m) onEditMedicine;
+  final Future<void> Function(Medicine m) onDeleteMedicine;
 
   @override
   Widget build(BuildContext context) {
@@ -481,6 +493,9 @@ class _PosCatalogPane extends StatelessWidget {
                       final card = _PosGridProductCard(
                         medicine: medicines[i],
                         onAdd: () => onPick(medicines[i]),
+                        canManage: canManage,
+                        onEdit: () => onEditMedicine(medicines[i]),
+                        onDelete: () => onDeleteMedicine(medicines[i]),
                       );
                       if (!animateTiles) return card;
                       return TweenAnimationBuilder<double>(
@@ -509,6 +524,9 @@ class _PosCatalogPane extends StatelessWidget {
                   itemBuilder: (context, i) => _PosListProductRow(
                     medicine: medicines[i],
                     onAdd: () => onPick(medicines[i]),
+                    canManage: canManage,
+                    onEdit: () => onEditMedicine(medicines[i]),
+                    onDelete: () => onDeleteMedicine(medicines[i]),
                   ),
                 ),
               ),
@@ -522,10 +540,19 @@ class _PosCatalogPane extends StatelessWidget {
 }
 
 class _PosGridProductCard extends StatefulWidget {
-  const _PosGridProductCard({required this.medicine, required this.onAdd});
+  const _PosGridProductCard({
+    required this.medicine,
+    required this.onAdd,
+    this.canManage = false,
+    this.onEdit,
+    this.onDelete,
+  });
 
   final Medicine medicine;
   final VoidCallback onAdd;
+  final bool canManage;
+  final VoidCallback? onEdit;
+  final Future<void> Function()? onDelete;
 
   @override
   State<_PosGridProductCard> createState() => _PosGridProductCardState();
@@ -675,6 +702,26 @@ class _PosGridProductCardState extends State<_PosGridProductCard> {
                                 ],
                               ),
                             ),
+                            if (widget.canManage)
+                              PopupMenuButton<String>(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(
+                                  Icons.more_vert_rounded,
+                                  size: 20,
+                                  color: theme.hintColor,
+                                ),
+                                onSelected: (v) {
+                                  if (v == 'edit') {
+                                    widget.onEdit?.call();
+                                  } else if (v == 'delete') {
+                                    widget.onDelete?.call();
+                                  }
+                                },
+                                itemBuilder: (ctx) => const [
+                                  PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                ],
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -814,10 +861,19 @@ class _PosGridPriceCell extends StatelessWidget {
 }
 
 class _PosListProductRow extends StatelessWidget {
-  const _PosListProductRow({required this.medicine, required this.onAdd});
+  const _PosListProductRow({
+    required this.medicine,
+    required this.onAdd,
+    this.canManage = false,
+    this.onEdit,
+    this.onDelete,
+  });
 
   final Medicine medicine;
   final VoidCallback onAdd;
+  final bool canManage;
+  final VoidCallback? onEdit;
+  final Future<void> Function()? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -882,6 +938,23 @@ class _PosListProductRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (canManage) ...[
+                const SizedBox(width: 4),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert_rounded),
+                  onSelected: (v) {
+                    if (v == 'edit') {
+                      onEdit?.call();
+                    } else if (v == 'delete') {
+                      onDelete?.call();
+                    }
+                  },
+                  itemBuilder: (ctx) => const [
+                    PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  ],
+                ),
+              ],
               const SizedBox(width: 8),
               FilledButton(
                 onPressed: onAdd,

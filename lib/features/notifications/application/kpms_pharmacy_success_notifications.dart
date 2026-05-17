@@ -66,6 +66,26 @@ abstract final class KpmsPharmacySuccessNotifications {
         payload: {'medicine_id': medicineId, 'name': medicineName},
       );
 
+  static Future<void> medicineUpdated(WidgetRef ref, {required String medicineName, required String medicineId}) =>
+      record(
+        ref: ref,
+        kind: KpmsNotificationKind.medicineUpdated,
+        title: 'Medicine updated',
+        body: medicineName,
+        dedupeKey: 'medicine_updated_${medicineId}_${DateTime.now().millisecondsSinceEpoch}',
+        payload: {'medicine_id': medicineId, 'name': medicineName},
+      );
+
+  static Future<void> medicineDeleted(WidgetRef ref, {required String medicineName, required String medicineId}) =>
+      record(
+        ref: ref,
+        kind: KpmsNotificationKind.medicineDeleted,
+        title: 'Medicine deleted',
+        body: medicineName,
+        dedupeKey: 'medicine_deleted_$medicineId',
+        payload: {'medicine_id': medicineId, 'name': medicineName},
+      );
+
   static Future<void> expenseAdded(WidgetRef ref, {required String expenseId, required double amount}) =>
       record(
         ref: ref,

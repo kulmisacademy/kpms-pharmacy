@@ -50,4 +50,8 @@ abstract final class KpmsSyncLog {
   static void syncBannerRetrying() => _emit('sync_banner_retrying');
 
   static void syncCompleted() => _emit('sync_completed');
+
+  static void medicineUpdated(String medicineClientId) => _emit('medicine_updated', medicineClientId);
+
+  static void medicineDeleted(String medicineClientId) => _emit('medicine_deleted', medicineClientId);
 }

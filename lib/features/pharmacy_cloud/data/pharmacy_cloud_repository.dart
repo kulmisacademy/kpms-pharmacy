@@ -261,6 +261,16 @@ class PharmacyCloudRepository {
     return rows;
   }
 
+  /// Removes catalog rows no longer present in the local workspace snapshot.
+  Future<void> deleteMedicines(String tenantId, List<String> clientIds) async {
+    final c = _client;
+    if (c == null || clientIds.isEmpty) return;
+    final ids = clientIds.map((e) => e.trim()).where((s) => s.isNotEmpty).toList();
+    if (ids.isEmpty) return;
+    await c.from('pharmacy_inventory').delete().eq('tenant_id', tenantId).inFilter('client_id', ids);
+    KpmsSyncLog.uploadCompleted(tenantId: tenantId, rows: ids.length);
+  }
+
   static bool localNeedsMigration({
     required List<Medicine> medicines,
     required SalesLedgerState sales,

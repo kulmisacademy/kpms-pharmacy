@@ -23,6 +23,7 @@ import '../core/tenant/kpms_tenant_log.dart';
 import '../core/tenant/pharmacy_workspace_isolation.dart';
 import '../features/debts/application/debt_customers_notifier.dart';
 import '../features/debts/domain/debt_customer.dart';
+import '../features/medicines/application/pending_medicine_deletions_notifier.dart';
 import '../features/medicines/data/medicine_catalog_notifier.dart';
 import '../features/medicines/domain/medicine.dart';
 import '../features/enterprise/application/medicine_categories_notifier.dart';
@@ -443,6 +444,7 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     _workspacePushInFlight = true;
     await _refreshSyncUi();
     try {
+      final pendingDeletes = List<String>.from(ref.read(pendingMedicineDeletionsProvider));
       await ref.read(pharmacyWorkspaceSyncServiceProvider).pushToCloud(
             tenantId: tid,
             medicines: ref.read(medicineCatalogProvider),
@@ -450,7 +452,11 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
             purchases: ref.read(purchaseLedgerProvider),
             debtCustomers: ref.read(debtCustomersProvider),
             suppliers: ref.read(suppliersProvider),
+            deletedMedicineClientIds: pendingDeletes,
           );
+      if (pendingDeletes.isNotEmpty) {
+        await ref.read(pendingMedicineDeletionsProvider.notifier).clearIds(pendingDeletes);
+      }
       await KpmsSyncOutboxService.clearPendingBulkForTenant(tid, entityType: KpmsSyncEntityType.workspace);
       await _refreshSyncUi();
     } catch (e) {

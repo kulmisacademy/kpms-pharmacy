@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/kpms_inventory_permission_provider.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/navigation/kpms_breakpoints.dart';
+import '../../../core/responsive/responsive_helpers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/kpms_empty_state.dart';
@@ -15,6 +17,7 @@ import '../application/medicine_catalog_stats.dart';
 import '../data/medicine_catalog_notifier.dart';
 import '../domain/medicine.dart';
 import '../domain/medicine_type_style.dart';
+import 'widgets/medicine_manage_actions.dart';
 
 /// Medicine catalog — uses shared [medicineCatalogProvider] (swap backend later).
 class MedicinesScreen extends ConsumerStatefulWidget {
@@ -57,6 +60,7 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
   void _openDetail(Medicine m) {
     final theme = Theme.of(context);
     final style = MedicineTypeStyle.resolve(m);
+    final canManage = ref.read(kpmsCanManageInventoryProvider);
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -100,11 +104,39 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
                 ),
               if (m.batchCode != null) _detailRow(ctx, 'Batch', m.batchCode!),
               if ((m.barcode ?? '').isNotEmpty) _detailRow(ctx, 'Barcode', m.barcode!),
-              const SizedBox(height: 12),
-              Text(
-                'Barcode & supplier sync via Supabase in production.',
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-              ),
+              if (canManage) ...[
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          context.push(MedicineManageActions.editRouteFor(m));
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Edit'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: theme.colorScheme.onError,
+                        ),
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          if (!mounted) return;
+                          await MedicineManageActions.confirmAndDelete(context, ref, m);
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                        label: const Text('Delete'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -152,6 +184,8 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
     final hasMore = filtered.length > _visibleLimit;
     final screenW = MediaQuery.sizeOf(context).width;
     final gutter = KpmsBreakpoints.pagePaddingHorizontal(screenW);
+    final canManage = ref.watch(kpmsCanManageInventoryProvider);
+    final useCompactActions = isMobile(context);
 
     return KpmsPageShell(
       title: 'Medicines',
@@ -168,11 +202,13 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
           icon: const Icon(Icons.document_scanner_outlined),
         ),
       ],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.addMedicine),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Add medicine'),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push(AppRoutes.addMedicine),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add medicine'),
+            )
+          : null,
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
@@ -357,6 +393,11 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
+                                    ),
+                                  if (canManage)
+                                    MedicineManageActions(
+                                      medicine: m,
+                                      compact: useCompactActions,
                                     ),
                                 ],
                               ),

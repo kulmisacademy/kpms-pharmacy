@@ -8,6 +8,9 @@ import '../../../core/utils/kpms_feedback.dart';
 import '../../../core/widgets/kpms_empty_state.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
+import '../../medicines/presentation/widgets/medicine_manage_actions.dart';
+import '../../../core/auth/kpms_inventory_permission_provider.dart';
+import '../../../core/responsive/responsive_helpers.dart';
 
 /// PRD §5.6 — Inventory (stock, adjustments, expiry, damaged).
 class InventoryScreen extends ConsumerStatefulWidget {
@@ -92,6 +95,8 @@ class _StockPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final meds = ref.watch(medicineCatalogProvider);
+    final canManage = ref.watch(kpmsCanManageInventoryProvider);
+    final compactActions = isMobile(context);
     if (meds.isEmpty) {
       return KpmsEmptyState(
         icon: Icons.inventory_2_outlined,
@@ -117,15 +122,24 @@ class _StockPanel extends ConsumerWidget {
             ),
             title: Text(m.name),
             subtitle: const Text('Shelf / bin — assign in settings'),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text('${m.quantity}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
-                Text(
-                  alert ? 'Low' : 'OK',
-                  style: theme.textTheme.labelSmall?.copyWith(color: alert ? const Color(0xFFB45309) : theme.hintColor),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('${m.quantity}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                    Text(
+                      alert ? 'Low' : 'OK',
+                      style: theme.textTheme.labelSmall?.copyWith(color: alert ? const Color(0xFFB45309) : theme.hintColor),
+                    ),
+                  ],
                 ),
+                if (canManage) ...[
+                  const SizedBox(width: 4),
+                  MedicineManageActions(medicine: m, compact: compactActions),
+                ],
               ],
             ),
           ),
