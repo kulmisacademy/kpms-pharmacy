@@ -52,3 +52,8 @@ kpms-release-key.jks
 /android/app/profile
 /android/app/release
 .vercel
+
+node_modules/
+.flutter-plugins
+.packages
+pubspec.lock
