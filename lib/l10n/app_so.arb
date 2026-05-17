@@ -1,0 +1,602 @@
+{
+  "@@locale": "so",
+  "appTitle": "KPMS",
+  "commonSave": "Kaydi",
+  "commonCancel": "Jooji",
+  "commonRetry": "Ku celi",
+  "commonEdit": "Wax ka beddel",
+  "commonClose": "Xir",
+  "commonUpdate": "Cusbooneysii",
+  "commonLoading": "Waa la soo dejinayaa…",
+  "commonNotSet": "Lama dejin",
+  "commonOn": "Shid",
+  "commonOff": "Dam",
+  "shellAllModules": "Dhammaan qaybaha",
+  "shellBack": "Dib u noqo",
+  "shellHome": "Guriga",
+  "shellNotifications": "Ogeysiisyada",
+  "shellToggleTheme": "Beddel habka midabka",
+  "drawerAllModulesTagline": "Dhammaan qaybaha",
+  "drawerPharmacySection": "Farmashi",
+  "drawerPlatformSection": "Madal (Super Admin)",
+  "dockHome": "Guriga",
+  "dockPos": "POS",
+  "dockAll": "Dhammaan",
+  "dockAlerts": "Digniino",
+  "dockSettings": "Dejinta",
+  "dockReports": "Warbixinno",
+  "navDashboardTitle": "Dashboard",
+  "navDashboardSubtitle": "Aragti guud iyo tallaabo degdeg ah",
+  "navMedicinesTitle": "Daawooyinka",
+  "navMedicinesSubtitle": "Liis, baaticho, iyo taariikhda u dhaca",
+  "navInventoryTitle": "Kaydka",
+  "navInventorySubtitle": "Heerarka kaydka iyo digniino",
+  "navPosTitle": "Iibka",
+  "navPosSubtitle": "Maamul iibka maalinlaha ah",
+  "navSalesReturnsTitle": "Soo celinta iibka",
+  "navSalesReturnsSubtitle": "Lacag celin iyo kayd soo celin",
+  "navDebtsTitle": "Deyn & amaah",
+  "navDebtsSubtitle": "Deyn macaamiil iyo alaab-qeybiyeyaal",
+  "navPurchasesTitle": "Iibsashada",
+  "navPurchasesSubtitle": "Raadraac iibsashada alaab-qeybiyeyaasha",
+  "navPurchaseReturnsTitle": "Soo celinta iibsashada",
+  "navPurchaseReturnsSubtitle": "Amarada alaab-qeybiyeyaasha iyo kaydka",
+  "navSuppliersTitle": "Alaab-qeybiyeyaal",
+  "navSuppliersSubtitle": "Xiriir iyo lacag bixinta",
+  "navCustomersTitle": "Macaamiil",
+  "navCustomersSubtitle": "Astamaha iyo taariikhda booqasho",
+  "navPrescriptionsTitle": "Qoraallada dhakhtarka",
+  "navPrescriptionsSubtitle": "Soo deji oo xaqiiji qoraallada",
+  "navStaffTitle": "Shaqaalaha",
+  "navStaffSubtitle": "Doorka iyo ogolaanshaha",
+  "navReportsTitle": "Warbixinno",
+  "navReportsSubtitle": "Falanqayn iyo aragti ganacsi",
+  "navTransactionsTitle": "Hawlgallada",
+  "navTransactionsSubtitle": "Iib, iibsi, soo celin, dhoofin",
+  "navSubscriptionsTitle": "Macaamiilka",
+  "navSubscriptionsSubtitle": "Qorshe iyo biilka",
+  "navNotificationsTitle": "Ogeysiisyada",
+  "navNotificationsSubtitle": "Digniino iyo xusuusin",
+  "navSettingsTitle": "Dejinta",
+  "navSettingsSubtitle": "Astamaha farmashiga iyo amniga",
+  "navBarcodeTitle": "Baarka skaan",
+  "navBarcodeSubtitle": "Raad degdeg ah iyo ku dar POS",
+  "navProfileTitle": "Profile",
+  "navProfileSubtitle": "Akoon, luqad, iyo ka bax",
+  "navSuperHomeTitle": "Guriga Super Admin",
+  "navSuperHomeSubtitle": "Tilmaamayaasha madal",
+  "navSuperPharmaciesTitle": "Dhammaan farmashiyada",
+  "navSuperPharmaciesSubtitle": "Liiska macaamiisha",
+  "navSuperPlansTitle": "Qorsheyaasha macaamiilka",
+  "navSuperPlansSubtitle": "Abuur & wax ka beddel qorsheyaasha",
+  "navSuperSupportTitle": "Tigidhada taageerada",
+  "navSuperSupportSubtitle": "Miiska caawimaadda",
+  "navSuperAnnouncementsTitle": "Ogeysiisyada guud",
+  "navSuperAnnouncementsSubtitle": "U dir macaamiisha",
+  "navSuperRevenueTitle": "Revenue & analytics",
+  "navSuperRevenueSubtitle": "MRR, ARR, and platform sales",
+  "navSuperUsersTitle": "Users & directory",
+  "navSuperUsersSubtitle": "Active accounts across tenants",
+  "navSuperApprovalsTitle": "Approvals",
+  "navSuperApprovalsSubtitle": "New pharmacy onboarding",
+  "navSuperAuditTitle": "Audit logs",
+  "navSuperAuditSubtitle": "Immutable activity trail",
+  "navSuperSessionsTitle": "Active sessions",
+  "navSuperSessionsSubtitle": "Sign-in footprint",
+  "navSuperMonitoringTitle": "System health",
+  "navSuperMonitoringSubtitle": "Latency, errors, quotas",
+  "navSuperGlobalSettingsTitle": "Global settings",
+  "navSuperGlobalSettingsSubtitle": "Feature flags & policies",
+  "platformRememberDevice": "Remember this device",
+  "platformRememberDeviceHint": "Doorbidayaasha waxaa lagu keydiyaa qalabkan. Waxaad ka baxi kartaa Profile ee barnaamijka farmashiga.",
+  "authSignOut": "Ka bax",
+  "settingsTitle": "Dejinta",
+  "settingsSubtitle": "Astamaha farmashiga, qiimaha, iyo amniga",
+  "settingsLoadError": "Lama soo dejin karo dejinta farmashiga",
+  "settingsNoPharmacy": "Akoonka laguma xidhin farmashi. Marka hore dhammaystir diiwaangelinta.",
+  "settingsRestoringWorkspace": "Dib u soo celinta goobta shaqada farmashiga…",
+  "settingsRetryingProfile": "Dib u isku day xiriirka profile-ka…",
+  "settingsLicenseNotSet": "Liisanka lama dejin",
+  "settingsSectionGeneral": "Guud",
+  "settingsSectionRegionFormats": "Gobolka & qaabka",
+  "settingsSectionPricing": "Qiimaha",
+  "settingsSectionReceipts": "Risiidh & qaansheeg",
+  "settingsSectionNotifications": "Ogeysiisyada",
+  "settingsSectionStaff": "Shaqaalaha & ogolaanshaha",
+  "settingsSectionSecurity": "Amniga",
+  "settingsSectionAppearance": "Muuqaalka",
+  "settingsSectionAbout": "Ku saabsan",
+  "settingsHeroEdit": "Wax ka beddel astaanta",
+  "settingsGeneralSummary": "Magac, astaan, xiriir, lacagta, iyo waqtiga",
+  "settingsGeneralOpen": "Fur dejinta guud",
+  "settingsLanguageRegionSummary": "Luqad, gobol, iyo qaababka",
+  "settingsLanguagePick": "Luqadda barnaamijka",
+  "settingsRegion": "Gobolka",
+  "settingsDateFormat": "Qaabka taariikhda",
+  "settingsNumberFormat": "Qaabka lambarrada",
+  "settingsPricingSummary": "Faa'iido, canshuur, tobanle, iyo qiimo dhimis",
+  "settingsPricingOpen": "Fur dejinta qiimaha",
+  "settingsReceiptSummary": "Hoose, daabacaadda, iyo xariiqa baarka",
+  "settingsReceiptOpen": "Fur dejinta risiidhka",
+  "settingsNotificationSummary": "Kayd, u dhac, deyn, iyo digniino",
+  "settingsNotificationOpen": "Doorbidayaasha ogeysiiska",
+  "settingsStaffSummary": "Doorka, qaababka, iyo amniga shaqaalaha",
+  "settingsStaffOpen": "Maamul shaqaalaha",
+  "settingsSecuritySummary": "Erayga sirta, fadhiyada, iyo qalabka",
+  "settingsAboutOpen": "Nooca, sharciga, iyo taageerada",
+  "settingsDarkMode": "Habka mugdiga ah",
+  "settingsThemeModeLight": "Iftiin",
+  "settingsThemeModeDark": "Mugdi",
+  "settingsThemeModeSystem": "Raac nidaamka",
+  "settingsManageSubscription": "Maamul macaamiilka",
+  "settingsTaxOpen": "Dejinta canshuurta",
+  "settingsTaxSubtitle": "Canshuurta iibka POS",
+  "settingsInvoiceOpen": "Qaabka risiidhka & qaansheegga",
+  "settingsSessionTitle": "Fadhiyada",
+  "settingsSessionSubtitle": "Waxaad ku jirtaa qalabkan adoo isticmaalaya Supabase Auth",
+  "settingsSessionSnack": "Hoos ka bax si aad u joojiso fadhigan. Qalabka kale waxay isticmaalaan gelitaan u gaar ah.",
+  "settingsSignOutTitle": "Ka bax",
+  "settingsSignOutSubtitle": "Jooji fadhiga qalabkan",
+  "settingsPasswordTitle": "Erayga sirta ah",
+  "settingsPasswordSubtitle": "Beddel erayga sirta ah ee akoonka",
+  "settingsOptionalPinTitle": "PIN / quful biometric",
+  "settingsOptionalPinSubtitle": "Quful qalab oo ikhtiyaari ah — cusboonaysiin dambe",
+  "languageEnglish": "Ingiriisi",
+  "languageSomali": "Soomaali",
+  "languageArabic": "Carabi",
+  "languageSheetTitle": "Luqadda barnaamijka",
+  "languageSheetHint": "Isbeddelka wuxuu isla markiiba cusboonaysiinayaa. Doorashadaada waxaa lagu keydiyaa qalabka waxaana lagu hagaajinayaa akoonka farmashiga marka ay suurtagal tahay.",
+  "aboutTitle": "Ku saabsan",
+  "aboutAppName": "Nidaamka Maamulka Farmashiga KULMIS",
+  "aboutVersionLabel": "Nooca",
+  "aboutBuildLabel": "Dhismaha",
+  "aboutDeveloper": "Horumariye",
+  "aboutDeveloperValue": "KULMIS",
+  "aboutTerms": "Shuruudaha adeegga",
+  "aboutPrivacy": "Siyaasadda asturnaanta",
+  "aboutContact": "Xiriir & taageero",
+  "aboutContactValue": "support@kulmis.example",
+  "aboutTermsBody": "Isticmaal KPMS sida liisanka farmashiga iyo xeerarka maxalliga ah. Tilmaamayaasha waxay isbeddeli karaan cusboonaysiinta.",
+  "aboutPrivacyBody": "Macluumaadka hawlgalka waxaa lagu baaraandegaa si loo shaqeeyo goobta farmashiga. Akhriso heshiiska macluumaadka ururka faahfaahinta buuxda.",
+  "aboutCopyright": "© KULMIS. Dhammaan xuquuqda way dhawran yihiin.",
+  "sheetPharmacyProfile": "Astamaha farmashiga",
+  "fieldPharmacyName": "Magaca farmashiga",
+  "fieldAddress": "Cinwaanka",
+  "fieldPhone": "Taleefoonka",
+  "fieldEmail": "Iimaylka",
+  "fieldLicense": "Lambarka liisanka",
+  "fieldOwner": "Milkiilaha diiwaangashan / kormeeyaha",
+  "fieldCurrency": "Koodhka lacagta",
+  "fieldTimezone": "Waqtiga (IANA)",
+  "fieldLogoUrl": "URL astaanta (ikhtiyaari)",
+  "fieldTaxRate": "Heerka canshuurta (%)",
+  "salesTaxTitle": "Canshuurta iibka",
+  "salesTaxDescription": "Waxaa lagu dabaqaa lacagta canshuurta leh ka dib qiimo dhimista POS (gaar ah).",
+  "receiptInvoiceTitle": "Risiidh & qaansheeg",
+  "receiptFooterLabel": "Qoraalka hoose (ikhtiyaari)",
+  "receiptFooterHint": "Qoraal sharci, mahadnaq…",
+  "receiptShowBarcode": "Muuji xariiqa baarka risiidhka",
+  "receiptShowBarcodeSubtitle": "Baarka qurxinta ah ee ka hooseeya wadarta",
+  "changePasswordTitle": "Beddel erayga sirta ah",
+  "changePasswordNew": "Eray sir cusub",
+  "changePasswordConfirm": "Xaqiiji erayga sirta ah",
+  "validationPharmacyNameRequired": "Magaca farmashiga waa lagama maarmaan",
+  "validationTaxRateRange": "Geli heer canshuur ah 0 ilaa 100",
+  "validationPasswordLength": "Erayga sirta ah waa inuu ugu yaraan yahay 6 xaraf",
+  "validationPasswordMismatch": "Erayada sirta ah isma waafaqaan",
+  "validationPasswordSignupRules": "Erayga sirta ah waa inuu ugu yaraan yahay 8 xaraf",
+  "authRecoveryVerifyLockedMinutes": "Isku dayo badan. Ku celi {minutes} daqiiqo gudahood.",
+  "@authRecoveryVerifyLockedMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordStrengthLabel": "Xoogga erayga sirta ah",
+  "passwordStrengthWeak": "Daciif",
+  "passwordStrengthFair": "Dhexdhexaad",
+  "passwordStrengthGood": "Wanaagsan",
+  "passwordStrengthStrong": "Xoog badan",
+  "resetPasswordSuccessTitle": "Eray sir waa la cusboonaysiiyay",
+  "authTooManyAttempts": "Isku dayo badan. Mar kale isku day daqiiqad yar kadib.",
+  "validationMarginRange": "Geli faa'iido u dhexeysa 0 iyo 99.99",
+  "validationDecimalsRange": "Geli lambar dhamaystiran 0 ilaa 6",
+  "snackPharmacySaved": "Astamaha farmashiga waa la kaydiyay",
+  "snackTaxUpdated": "Heerka canshuurta waa la cusboonaysiiyay",
+  "snackInvoiceSaved": "Dejinta qaansheegga waa la kaydiyay",
+  "snackPasswordUpdated": "Erayga sirta ah waa la cusboonaysiiyay",
+  "snackLocaleUpdated": "Luqadda waa la cusboonaysiiyay",
+  "snackSaveFailed": "Kaydinta way fashilantay",
+  "pricingSheetTitle": "Qiimaha",
+  "pricingProfitMargin": "Faa'iidada caadiga ah (%)",
+  "pricingProfitHint": "Waxaa loo isticmaalaa tilmaan marka la qiimeeyo daawooyinka",
+  "pricingDecimalPlaces": "Tobanlayda qiimaha",
+  "pricingDiscountBehavior": "Habka qiimo dhimista",
+  "pricingDiscountPerLine": "Ku dabaqo khadadka",
+  "pricingDiscountOnTotal": "Ku dabaqo wadarta risiidhka",
+  "pricingTaxInclusive": "Muuqaalka canshuurta ku jirta",
+  "pricingTaxInclusiveSubtitle": "Muuji lacagaha canshuurta ku jirta meesha la taageerayo",
+  "notificationsLowStock": "Digniino kayd yar",
+  "notificationsLowStockSubtitle": "Iftiimi marka tirada ka hooseyso xadka",
+  "notificationsExpiry": "Digniino u dhac",
+  "notificationsExpirySubtitle": "Soo bandhig baaticho u dhow u dhaca",
+  "notificationsDebt": "Xusuusinta deynta",
+  "notificationsDebtSubtitle": "Digniino dheelitir macaamiil",
+  "notificationsSound": "Codadka",
+  "notificationsVibrate": "Gariir",
+  "receiptPaperSize": "Cabbirka warqadda",
+  "receiptPrintQuality": "Tayada daabacaadda",
+  "printQualityDraft": "Qabyo",
+  "printQualityNormal": "Caadi",
+  "printQualityHigh": "Sare",
+  "paperSizeDefault": "Caadiga ah",
+  "paperSizeThermal58": "Thermal 58 mm",
+  "paperSizeThermal80": "Thermal 80 mm",
+  "paperSizeA4": "A4",
+  "regionUseDevice": "La jaan qaado qalabka",
+  "regionSomalia": "Soomaaliya",
+  "regionGeneric": "Caalamiga ah",
+  "dateFormatSystem": "Caadiga nidaamka",
+  "dateFormatDdMmYyyy": "DD/MM/YYYY",
+  "dateFormatMmDdYyyy": "MM/DD/YYYY",
+  "dateFormatYyyyMmDd": "YYYY-MM-DD",
+  "numberFormatSystem": "Caadiga nidaamka",
+  "numberFormatWestern": "Galbeed (0–9)",
+  "numberFormatArabicIndic": "Lambarada Carabiga Hindiga",
+  "staffTemplatesTitle": "Qaababka ogolaanshaha",
+  "staffTemplatesSubtitle": "Xirmado horay loo dejiyay: kaashiyar, farmashiiste, maareeye",
+  "staffTemplatesSnack": "Qaababka waxaa lagu dabaqaa marka la abuuro ama la wax ka beddelo shaqaalaha qaybta Staff.",
+  "staffSecurityTitle": "Xeerarka amniga shaqaalaha",
+  "staffSecuritySubtitle": "U baahan eray sir xooggan oo xaddid tallaabooyinka khatarta ah maamulayaasha",
+  "staffSecuritySnack": "Ka deji doorka iyo marin gelitaanka jidadka Staff. Tallaabooyinka xasaasiga ah waxay ku jiraan maamulayaasha farmashiga.",
+  "settingsReceiptExtrasOpen": "Daabac & warqad",
+  "settingsReceiptExtrasSummary": "Cabbirka warqadda, tayada daabacaadda, iyo xariiqa baarka",
+  "settingsTaxRateCurrent": "Heerka hadda: {rate}%",
+  "settingsInvoicePreviewFooter": "{snippet} · baarka {state}",
+  "settingsInvoicePreviewEmpty": "Qoraal hoose · xariiqa baarka",
+  "settingsGeneralContactLine": "{phone} · {email}",
+  "settingsGeneralCurrencyLine": "{currency} · {timezone}",
+  "featuresHubTitle": "Dhammaan astaamaha",
+  "featuresHubSubtitlePharmacy": "Qaybaha farmashigaaga",
+  "featuresHubSubtitlePlatform": "Qalabka madal",
+  "featuresClose": "Xir",
+  "featuresPermissionsError": "Lama soo dejin karo ogolaanshaha.",
+  "platformSearchModules": "Raadi madal",
+  "platformSearchNoMatches": "Wax la jaan qaaday ma jiro",
+  "commonBack": "Dib",
+  "commonNext": "Xiga",
+  "commonContinue": "Sii wad",
+  "commonSkip": "Ka gudub",
+  "commonEmail": "Iimayl",
+  "validationEmailInvalid": "Geli ciwaan iimayl sax ah",
+  "authWelcomeBack": "Ku soo dhawoow mar kale",
+  "authWorkEmailLabel": "Iimaylka shaqada",
+  "authPasswordLabel": "Erayga sirta ah",
+  "authForgotPasswordLink": "Ma illoobtay erayga sirta ah?",
+  "authSignInButton": "Gal",
+  "authRegisterPharmacyLink": "Is diiwaangeli farmashiis cusub",
+  "authPharmacySignInTitle": "Galitaanka farmashiga",
+  "authPharmacySignInSubtitle": "Isticmaal iimaylkaaga iyo erayga sirta ah ee goobta shaqada.",
+  "profileTitle": "Profile",
+  "profileSubtitle": "Koontadaada iyo doorbidayaashaada",
+  "profileSectionPreferences": "Doorbidayaasha",
+  "profileLanguageOpen": "Luqadda barnaamijka",
+  "profileThemeTitle": "Habka muuqaalka",
+  "profileThemeSystem": "Nidaamka",
+  "profileThemeLight": "Iftiin",
+  "profileThemeDark": "Madow",
+  "profilePharmacySettings": "Dejinta farmashiga",
+  "profilePharmacySettingsSubtitle": "Qiimaha, risiidhada, shaqaalaha, iyo hawlgalka",
+  "profileSubscriptionOpen": "Macaamiilka & biilka",
+  "profileChangePassword": "Beddel erayga sirta ah",
+  "profileAccountLabel": "U gashan",
+  "profileLogout": "Ka bax",
+  "registerPharmacyTitle": "Abuur farmashigaaga",
+  "registerPharmacySubtitle": "Deji goobta shaqada iyo koontada milkiilaha.",
+  "registerSubmitCta": "Abuur farmashi oo gal",
+  "registerLicenseHelper": "Ikhtiyaari — ku dar liisanka marka aad haysato",
+  "registerPhoneRequired": "Lambarka telefoonka waa lagama maarmaan.",
+  "registerOwnerRequired": "Magaca milkiilaha waa lagama maarmaan.",
+  "registerSessionMissing": "Fadhigu ma jiro. Halkii isku day inaad gasho.",
+  "registerDuplicateHelp": "Iimaylkan horay ayuu u diiwaan ahaa. Ku gal erayga saxda ah ama dib u deji.",
+  "registerVerifyEmailFirst": "Xaqiiji iimaylkaaga xiriirka sanduuqa, ka dibna gal ama mar kale isku day.",
+  "registerGenericError": "Diiwaangelinta lama dhammaystiri karin.",
+  "registerFieldPharmacyName": "Magaca farmashiga",
+  "registerNameRequired": "Magaca farmashiga waa lagama maarmaan.",
+  "registerFieldOwnerName": "Magaca buuxa ee milkiilaha",
+  "registerFieldPhone": "Lambarka telefoonka",
+  "registerFieldAddressOptional": "Cinwaanka (ikhtiyaari)",
+  "registerFieldLicenseOptional": "Lambarka liisanka (ikhtiyaari)",
+  "registerLogoSubtitle": "Ikhtiyaari. Waxaa lagu muujin doonaa fawtiirada iyo rasiidhada marka farmashiga la abuuro.",
+  "registerLogoGallery": "Sawirada",
+  "registerLogoCamera": "Kaamirada",
+  "registerLogoRemove": "Ka saar astaanta",
+  "registerLogoApplyFail": "Farmashigu waa la abuuray, laakiin astaanta lama keydin. Ku dar Settings-ka farmashiga.",
+  "registerLogoInvalidFormat": "Dooro sawir PNG, JPG, ama WEBP.",
+  "registerLogoButton": "Astaanta farmashiga",
+  "resetPasswordTitle": "Dooro eray sir cusub",
+  "resetPasswordSubtitle": "Geli oo xaqiiji eray sir xoog leh.",
+  "resetPasswordSubmit": "Cusbooneysii erayga sirta ah",
+  "resetPasswordDone": "Erayga sirta ah waa la cusbooneysiiyay. Ku gal erayga sirta ah ee cusub.",
+  "resetPasswordInvalidLink": "Fadhiga dib u dejinta ma jiro. Isticmaal «Ma illoobtay erayga sirta ah» si aad u codsato koodh, ama fur xiriirka iimaylka ee webka.",
+  "resetPasswordBackToSignIn": "Ku noqo gelitaanka",
+  "superAdminLoginTitle": "Galitaanka maamulaha madal",
+  "superAdminLoginSubtitle": "Maamulka madalka — looma talin shaqaalaha farmashiga.",
+  "superAdminAccessDenied": "Koontadan looma oggola gelitaanka maamulaha.",
+  "superAdminPharmacyPortalLink": "Galitaanka barnaamijka farmashiga",
+  "authVerifyEmailLink": "Waxaan u baahanahay inaan xaqiijiyo iimaylkayga",
+  "authSignInFailed": "Galidu way fashilantay: {error}",
+  "@authSignInFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authCheckEmailConfirm": "Hubi iimaylkaaga si loo xaqiijiyo koontadaada.",
+  "authForgotTitle": "Dib u deji erayga sirta ah",
+  "authForgotSubtitle": "Waxaan kuu soo dirnaa koodh 6-lambar ah oo KPMS ah. Ku gel halkan, ka dibna dooro eray sir cusub — wax walba wuxuu ku jiraa barnaamijkan.",
+  "authForgotSendLink": "Dir koodhka xaqiijinta",
+  "authForgotResetSent": "Koodhka xaqiijinta waa la diray. Hubi iimaylkaaga iyo spam-ka.",
+  "authForgotHaveResetLink": "Waxaan horey u hayaa koodh",
+  "authRecoveryEmailHint": "Fur iimaylka dib u dejinta erayga sirta ah ee KPMS oo geli koodhka 6-da lambar ee ku jira.",
+  "authRecoveryOtpExpiresIn": "Koodhku wuu dhammaadaa {time} gudahood",
+  "@authRecoveryOtpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "authRecoveryOtpExpired": "Koodhkan wuu dhammaaday. Riix Dib u dir si aad u hesho mid cusub.",
+  "authRecoveryVerifyTitle": "Geli koodhka xaqiijinta",
+  "authRecoveryCodeLabel": "Lambarka 6-ta",
+  "authRecoveryVerifyCta": "Xaqiiji oo sii wad",
+  "authRecoveryResend": "Dib u dir koodhka",
+  "authRecoveryResendIn": "Dib u dir {seconds} ilbiriqsi gudahood",
+  "@authRecoveryResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authRecoveryResendAvailableIn": "Dib u dir waxaa la heli karaa {seconds} ilbiriqsi gudahood",
+  "@authRecoveryResendAvailableIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authOtpPaste": "Ku dheji koodhka",
+  "passwordConfirmMatches": "Erayada sirta ah waa isku waafaqaan",
+  "passwordConfirmDoesNotMatch": "Erayada sirta ah wali isma waafaqaan",
+  "authRecoveryWaitSend": "Fadlan sug ka hor intaadan codsan koodh cusub.",
+  "authRecoveryTooManyVerify": "Isku day khalad badan. Codso koodh cusub ama mar kale isku day.",
+  "authRecoveryEditEmail": "Isticmaal iimayl kale",
+  "authRecoveryCodeIncomplete": "Geli koodhka oo dhan sida ku jira iimaylka.",
+  "authForgotSendFailed": "Lama diri karo dib u dejinta: {error}",
+  "@authForgotSendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyTitle": "Xaqiiji iimaylkaaga",
+  "authVerifyBodyGeneric": "Waxaan kuu dirnay xiriir sanduuqaaga. Xaqiiji si aad u firxato koontada farmashigaaga.",
+  "authVerifyBodyWithEmail": "Waxaan kuu dirnay xiriir {email}. Xaqiiji si aad u firxato koontadaada.",
+  "@authVerifyBodyWithEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyResend": "Dib u dir iimaylka",
+  "authVerifyBackSignIn": "Ku noqo gelitaanka",
+  "authVerifyMissingEmail": "Iimayl ma jiro. Ku noqo gelitaanka oo isku day mar kale.",
+  "authVerifySent": "Iimaylka xaqiijinta waa la diray.",
+  "authVerifyResendFailed": "Dib u diridu way fashilantay: {error}",
+  "@authVerifyResendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardGetStarted": "Bilow",
+  "onboardThemeDark": "Mawduuca: mugdi (riix si aad u isticmaasho nidaamka)",
+  "onboardThemeLight": "Mawduuca: iftiin (riix si aad u isticmaasho mugdi)",
+  "onboardThemeSystem": "Mawduuca: nidaamka (riix si aad u isticmaasho iftiin)",
+  "onboardWelcomeTitle": "Ku soo dhawoow {appName}",
+  "@onboardWelcomeTitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardWelcomeSubtitle": "Hawlaha casriga ah ee farmashiga — kaydka, POS-ka, iyo waafaqsanaanta hal meel.",
+  "onboardSellTitle": "Ku iibso kalsooni",
+  "onboardSellSubtitle": "Bixinta degdegga ah, qiimaha cad, iyo lacag bixinta habaysan miis kasta.",
+  "onboardAnalyticsTitle": "Arag waxa muhiimka ah",
+  "onboardAnalyticsSubtitle": "Falanqaynta iyo dhoofinta waxay kaa caawiyaan inaad raadiso waxqabadka adigoon malayn.",
+  "onboardComfortTitle": "Raaxo iftiin kasta",
+  "onboardComfortSubtitle": "Beddel mawduuca wakhti kasta — iftiin, mugdi, ama raac nidaamkaaga.",
+  "notFoundTitle": "Bogga lama helin",
+  "notFoundGoDashboard": "Tag bogga guud",
+  "notFoundSignIn": "Gal",
+  "supabaseNotConfiguredTitle": "Supabase lama dejin",
+  "supabaseNotConfiguredHint": "Ku dar SUPABASE_URL iyo SUPABASE_ANON_KEY (fure anon oo dadweyne ah oo keliya).",
+  "supabaseConfigHelpMobile": "Debug Android/iOS: dhig `.env` meel u dhow `pubspec.yaml` — waxaa lagu nuqulsanayaa `assets/env/generated_debug.env` dhismaha Debug. Kadib `flutter run` mar kale.\nRelease/APK: buuxi `assets/env/default.env` ama isticmaal CI `--dart-define`.",
+  "supabaseConfigHelpWeb": "Web: orod `dart run tool/kpms_sync_root_env.dart` hal mar, kadib `flutter run -d chrome`. Ama isticmaal `--dart-define-from-file=.env`.",
+  "supabaseConfigHelpDesktop": "Desktop: nuqul `.env.example` → `.env` xididka mashruuca, kadib `flutter run`. Dhismaha Release waxay isticmaalaan `assets/env/default.env` ama CI `--dart-define`.",
+  "supabaseConfigConsoleHint": "Console: raadi khadadka `[kpms]`.",
+  "dashboardTitle": "Bogga guud",
+  "dashboardSubtitleOverview": "Aragti guud",
+  "dashSectionSalesProfit": "Iibka & faa'iidada",
+  "dashSectionSalesProfitHint": "Falanqaynta fadhiga tooska ah",
+  "dashEmptySalesAnalyticsTitle": "Wali ma jirto falanqayn iib",
+  "dashEmptySalesAnalyticsMessage": "Diiwaan iibka POS si aad u aragto isbeddellada iyo khadadka ugu iibsada badan halkan.",
+  "dashOpenPos": "Fur POS",
+  "dashRevenueHiddenRole": "Isbeddelka dakhliga waxaa laga qariyay doorkaaga.",
+  "dashRevenueTrendPlaceholder": "Isbeddelka dakhliga maalinlaha ah wuxuu muuqdaa marka taxane waqtiga la heli karo.",
+  "dashDailySales": "Iibka maalinlaha ah",
+  "dashRevenuePulse": "Garaaca dakhliga",
+  "dashTopSellingPlaceholder": "Tirada ugu iibsada badan waxay muuqataa ka dib bixinta.",
+  "dashMonthlyTrendHidden": "Isbeddelka billaha ah waxaa laga qariyay doorkaaga.",
+  "dashMonthlySeriesPlaceholder": "Taxanaha billaha ah wuxuu muuqdaa markaad diiwaan geliso maalmo badan oo bixinta.",
+  "dashMonthlySales": "Iibka billaha ah",
+  "dashMonthlyTrajectory": "Wadada",
+  "dashSectionInventory": "Aragtida kaydka",
+  "dashSectionInventoryHint": "Kayd, taariikhda dhammaadka, xawaaraha",
+  "dashSectionRecentActivity": "Waxqabadka dhowaan",
+  "dashSectionRecentActivityHint": "Iibka, iibsashada, lacag bixinta",
+  "dashEmptyRecentTitle": "Waxqabad dhowaan ma jiro",
+  "dashEmptyRecentMessage": "Iibka, iibsashada, iyo lacag bixinta alaab-qeybiyeyaasha waxay halkan ku muuqan doonaan markaad isticmaasho nidaamka.",
+  "dashStartSale": "Bilow iib",
+  "dashKpiTotalSales": "Wadarta iibka",
+  "dashKpiThisMonth": "Bishaan",
+  "dashKpiCustomerCredits": "Deynta macaamiisha",
+  "dashKpiOpenAr": "AR furan",
+  "dashKpiSupplierDebts": "Deynta alaab-qeybiyeyaasha",
+  "dashKpiOpenAp": "AP furan",
+  "dashKpiTotalMedicines": "Wadarta daawooyinka",
+  "dashKpiCatalogSkus": "SKU-yada buugga",
+  "dashKpiLowStock": "Kayd hoose",
+  "dashKpiBelowMinimum": "Ka hooseeya ugu yar",
+  "dashKpiExpiringSoon": "Dhawaan way dhammaanayaan",
+  "dashKpiWithin90Days": "90 maalmood gudahood",
+  "dashProfitTrend": "Isbeddelka faa'iidada",
+  "dashProfitMtdSession": "Bisha ilaa hadda (fadhiga)",
+  "dashHiddenForRole": "Laga qariyay doorkaaga.",
+  "dashProfitHintBody": "Faa'iidada waxay cusboonaysiisaa marka khadadka bixinta ay soo diyaariyaan faa'iidada POS. Dhoofi wararka xisaabinta.",
+  "dashInsightLowStock": "Kayd hoose",
+  "dashInsightLowStockAllOk": "Dhammaan SKU-yada waxay ka sarreeyaan ugu yar.",
+  "dashInsightExpiringSoon": "Dhawaan way dhammaanayaan",
+  "dashInsightExpiringSkuCount": "{count} SKU 90 maalmood gudahood.",
+  "@dashInsightExpiringSkuCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashInsightExpiringNone": "Ma jiro baatsho 90-maalmood ah.",
+  "dashInsightFastSelling": "Iib degdeg ah",
+  "dashInsightVelocityPlaceholder": "Diiwaan iib si aad u buuxiso xawaaraha.",
+  "dashRecentSaleTitle": "Iib {invoice}",
+  "@dashRecentSaleTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleWithAmount": "POS · {amount} · {method}",
+  "@dashRecentSaleSubtitleWithAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleNoAmount": "POS · {method}",
+  "@dashRecentSaleSubtitleNoAmount": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseTitle": "Iibsasho {invoice}",
+  "@dashRecentPurchaseTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseSubtitle": "Iibsashada · {supplier}",
+  "@dashRecentPurchaseSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSupplierPayment": "Lacag bixinta alaab-qeybiye",
+  "dashRecentSupplierPaymentSubtitle": "{supplier} · {amount}",
+  "@dashRecentSupplierPaymentSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashSupplierFallback": "Alaab-qeybiye",
+  "dashStaffPermissionsTitle": "Shaqaalaha & ogolaanshaha",
+  "dashStaffPermissionsHint": "Casuumaadaha, doorka, iyo raadraaca marin gelitaanka waxay ku jiraan Staff hal meel.",
+  "dashLowStockBanner": "{count, plural, one{Digniin kayd hoose · 1 SKU} other{Digniin kayd hoose · {count} SKU}}",
+  "@dashLowStockBanner": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "dashSegmentDay": "Maalin",
+  "dashSegmentWeek": "Toddobaad",
+  "dashSegmentMonth": "Bil",
+  "dashInsightsTitle": "Aragtiyo",
+  "dashMiniRevenue": "Dakhli",
+  "dashMiniProfitMo": "Faa'iido (bil)",
+  "dashMiniTopSku": "SKU ugu sareeya",
+  "dashInsightCaptionDaily": "Garaaca iibka maalinlaha ah",
+  "dashInsightCaptionWeekly": "Garaaca toddobaadlaha ah",
+  "dashInsightCaptionMonthly": "Wadada billaha ah",
+  "dashChartsEmptyHint": "Jaantusyada waxay buuxsamaan marka iib la diiwaangeliyey uu jiro muddadan.",
+  "dashFinancialChartHiddenRole": "Jaantuska maaliyadeed waxaa laga qariyay doorkaaga.",
+  "dashTopSellersTitle": "Ugu iibiyey badan",
+  "dashUnitsSoldSession": "Cutubyada la iibiyay (fadhiga)",
+  "dashLowStockListTitle": "Kayd hoose",
+  "dashLowStockListAllOk": "Dhammaan SKU-yada waxay ka sarreeyaan ugu yar",
+  "dashSalesTrendTitle": "Isbeddelka iibka",
+  "dashChartRecentPoints": "Dhibco dhowaan ({count})",
+  "@dashChartRecentPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashChartTrendPoints": "Isbeddel ({count} dhibco)",
+  "@dashChartTrendPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashReview": "Dib u eeg",
+  "dashTopSellingLine": "{name} · {units} cutub",
+  "@dashTopSellingLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  }
+}

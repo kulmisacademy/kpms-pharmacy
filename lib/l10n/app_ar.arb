@@ -1,0 +1,602 @@
+{
+  "@@locale": "ar",
+  "appTitle": "KPMS",
+  "commonSave": "حفظ",
+  "commonCancel": "إلغاء",
+  "commonRetry": "إعادة المحاولة",
+  "commonEdit": "تعديل",
+  "commonClose": "إغلاق",
+  "commonUpdate": "تحديث",
+  "commonLoading": "جارٍ التحميل…",
+  "commonNotSet": "غير محدد",
+  "commonOn": "تشغيل",
+  "commonOff": "إيقاف",
+  "shellAllModules": "كل الوحدات",
+  "shellBack": "رجوع",
+  "shellHome": "الرئيسية",
+  "shellNotifications": "الإشعارات",
+  "shellToggleTheme": "تبديل السمة",
+  "drawerAllModulesTagline": "كل الوحدات",
+  "drawerPharmacySection": "الصيدلية",
+  "drawerPlatformSection": "المنصة (مشرف عام)",
+  "dockHome": "الرئيسية",
+  "dockPos": "نقطة البيع",
+  "dockAll": "الكل",
+  "dockAlerts": "التنبيهات",
+  "dockSettings": "الإعدادات",
+  "dockReports": "التقارير",
+  "navDashboardTitle": "لوحة التحكم",
+  "navDashboardSubtitle": "نظرة عامة وإجراءات سريعة",
+  "navMedicinesTitle": "الأدوية",
+  "navMedicinesSubtitle": "الكتالوج والدفعات والصلاحية",
+  "navInventoryTitle": "المخزون",
+  "navInventorySubtitle": "مستويات المخزون والتنبيهات",
+  "navPosTitle": "المبيعات",
+  "navPosSubtitle": "إدارة مبيعات الصيدلية اليومية",
+  "navSalesReturnsTitle": "مرتجعات المبيعات",
+  "navSalesReturnsSubtitle": "الاسترداد وإرجاع المخزون",
+  "navDebtsTitle": "الديون والائتمان",
+  "navDebtsSubtitle": "ذمم العملاء والموردين",
+  "navPurchasesTitle": "المشتريات",
+  "navPurchasesSubtitle": "تتبع مشتريات الموردين",
+  "navPurchaseReturnsTitle": "مرتجعات المشتريات",
+  "navPurchaseReturnsSubtitle": "ائتمانات الموردين والمخزون",
+  "navSuppliersTitle": "الموردون",
+  "navSuppliersSubtitle": "جهات الاتصال والمدفوعات",
+  "navCustomersTitle": "العملاء",
+  "navCustomersSubtitle": "الملفات وسجل الزيارات",
+  "navPrescriptionsTitle": "الوصفات",
+  "navPrescriptionsSubtitle": "رفع الوصفات والتحقق منها",
+  "navStaffTitle": "الموظفون",
+  "navStaffSubtitle": "الأدوار والصلاحيات",
+  "navReportsTitle": "التقارير",
+  "navReportsSubtitle": "التحليلات ورؤى الأعمال",
+  "navTransactionsTitle": "المعاملات",
+  "navTransactionsSubtitle": "مبيعات ومشتريات ومرتجعات وتصدير",
+  "navSubscriptionsTitle": "الاشتراك",
+  "navSubscriptionsSubtitle": "الخطط والفوترة",
+  "navNotificationsTitle": "الإشعارات",
+  "navNotificationsSubtitle": "التنبيهات والتذكيرات",
+  "navSettingsTitle": "الإعدادات",
+  "navSettingsSubtitle": "ملف الصيدلية والأمان",
+  "navBarcodeTitle": "مسح الباركود",
+  "navBarcodeSubtitle": "بحث سريع وإضافة لنقطة البيع",
+  "navProfileTitle": "الملف الشخصي",
+  "navProfileSubtitle": "الحساب واللغة وتسجيل الخروج",
+  "navSuperHomeTitle": "رئيسية المشرف العام",
+  "navSuperHomeSubtitle": "مؤشرات المنصة",
+  "navSuperPharmaciesTitle": "كل الصيدليات",
+  "navSuperPharmaciesSubtitle": "دليل المستأجرين",
+  "navSuperPlansTitle": "خطط الاشتراك",
+  "navSuperPlansSubtitle": "إنشاء الخطط وتعديلها",
+  "navSuperSupportTitle": "تذاكر الدعم",
+  "navSuperSupportSubtitle": "مكتب المساعدة",
+  "navSuperAnnouncementsTitle": "الإعلانات",
+  "navSuperAnnouncementsSubtitle": "بث للمستأجرين",
+  "navSuperRevenueTitle": "Revenue & analytics",
+  "navSuperRevenueSubtitle": "MRR, ARR, and platform sales",
+  "navSuperUsersTitle": "Users & directory",
+  "navSuperUsersSubtitle": "Active accounts across tenants",
+  "navSuperApprovalsTitle": "Approvals",
+  "navSuperApprovalsSubtitle": "New pharmacy onboarding",
+  "navSuperAuditTitle": "Audit logs",
+  "navSuperAuditSubtitle": "Immutable activity trail",
+  "navSuperSessionsTitle": "Active sessions",
+  "navSuperSessionsSubtitle": "Sign-in footprint",
+  "navSuperMonitoringTitle": "System health",
+  "navSuperMonitoringSubtitle": "Latency, errors, quotas",
+  "navSuperGlobalSettingsTitle": "Global settings",
+  "navSuperGlobalSettingsSubtitle": "Feature flags & policies",
+  "platformRememberDevice": "Remember this device",
+  "platformRememberDeviceHint": "تُحفظ التفضيلات على هذا الجهاز. يمكنك تسجيل الخروج من الملف الشخصي في تطبيق الصيدلية.",
+  "authSignOut": "تسجيل الخروج",
+  "settingsTitle": "الإعدادات",
+  "settingsSubtitle": "ملف الصيدلية والتسعير والأمان",
+  "settingsLoadError": "تعذر تحميل إعدادات الصيدلية",
+  "settingsNoPharmacy": "لا توجد صيدلية مرتبطة بهذا الحساب. أكمل التسجيل أولاً.",
+  "settingsRestoringWorkspace": "جارٍ استعادة مساحة عمل الصيدلية…",
+  "settingsRetryingProfile": "إعادة محاولة الاتصال بالملف الشخصي…",
+  "settingsLicenseNotSet": "لم يُحدد الرخص",
+  "settingsSectionGeneral": "عام",
+  "settingsSectionRegionFormats": "المنطقة والتنسيقات",
+  "settingsSectionPricing": "التسعير",
+  "settingsSectionReceipts": "الإيصال والفاتورة",
+  "settingsSectionNotifications": "الإشعارات",
+  "settingsSectionStaff": "الموظفون والصلاحيات",
+  "settingsSectionSecurity": "الأمان",
+  "settingsSectionAppearance": "المظهر",
+  "settingsSectionAbout": "حول",
+  "settingsHeroEdit": "تعديل الملف",
+  "settingsGeneralSummary": "الاسم والشعار والاتصال والعملة والمنطقة الزمنية",
+  "settingsGeneralOpen": "فتح الإعدادات العامة",
+  "settingsLanguageRegionSummary": "اللغة والمنطقة والتنسيقات",
+  "settingsLanguagePick": "لغة التطبيق",
+  "settingsRegion": "المنطقة",
+  "settingsDateFormat": "تنسيق التاريخ",
+  "settingsNumberFormat": "تنسيق الأرقام",
+  "settingsPricingSummary": "الهوامش والضرائب والكسور والخصومات",
+  "settingsPricingOpen": "فتح إعدادات التسعير",
+  "settingsReceiptSummary": "التذييل وخيارات الطباعة وشريط الباركود",
+  "settingsReceiptOpen": "فتح إعدادات الإيصال",
+  "settingsNotificationSummary": "المخزون والصلاحية والديون والتنبيهات",
+  "settingsNotificationOpen": "تفضيلات الإشعارات",
+  "settingsStaffSummary": "الأدوار والقوالب وأمان الموظفين",
+  "settingsStaffOpen": "إدارة الموظفين",
+  "settingsSecuritySummary": "كلمة المرور والجلسات والأجهزة",
+  "settingsAboutOpen": "الإصدار والقانون والدعم",
+  "settingsDarkMode": "الوضع الداكن",
+  "settingsThemeModeLight": "فاتح",
+  "settingsThemeModeDark": "داكن",
+  "settingsThemeModeSystem": "حسب النظام",
+  "settingsManageSubscription": "إدارة الاشتراك",
+  "settingsTaxOpen": "إعدادات الضريبة",
+  "settingsTaxSubtitle": "ضريبة المبيعات عند الدفع",
+  "settingsInvoiceOpen": "قالب الإيصال والفاتورة",
+  "settingsSessionTitle": "الجلسات",
+  "settingsSessionSubtitle": "أنت مسجل على هذا الجهاز عبر Supabase Auth",
+  "settingsSessionSnack": "سجّل الخروج أدناه لإنهاء هذه الجلسة. الأجهزة الأخرى لها تسجيل خاص.",
+  "settingsSignOutTitle": "تسجيل الخروج",
+  "settingsSignOutSubtitle": "إنهاء الجلسة على هذا الجهاز",
+  "settingsPasswordTitle": "كلمة المرور",
+  "settingsPasswordSubtitle": "تغيير كلمة مرور هذا الحساب",
+  "settingsOptionalPinTitle": "قفل PIN / القياسات الحيوية",
+  "settingsOptionalPinSubtitle": "قفل اختياري للجهاز — في تحديث لاحق",
+  "languageEnglish": "الإنجليزية",
+  "languageSomali": "الصومالية",
+  "languageArabic": "العربية",
+  "languageSheetTitle": "لغة التطبيق",
+  "languageSheetHint": "يتم تحديث الواجهة فورًا. يُحفظ اختيارك على هذا الجهاز ويُزامن مع حساب الصيدلية عند الإمكان.",
+  "aboutTitle": "حول",
+  "aboutAppName": "نظام KULMIS لإدارة الصيدليات",
+  "aboutVersionLabel": "الإصدار",
+  "aboutBuildLabel": "البنية",
+  "aboutDeveloper": "المطور",
+  "aboutDeveloperValue": "KULMIS",
+  "aboutTerms": "شروط الخدمة",
+  "aboutPrivacy": "سياسة الخصوصية",
+  "aboutContact": "الاتصال والدعم",
+  "aboutContactValue": "support@kulmis.example",
+  "aboutTermsBody": "استخدم KPMS وفق ترخيص الصيدلية والأنظمة المحلية. قد تتغير الميزات مع التحديثات.",
+  "aboutPrivacyBody": "تُعالج البيانات التشغيلية لتشغيل مساحة عمل الصيدلية. راجع اتفاقية معالجة البيانات لمزيد من التفاصيل.",
+  "aboutCopyright": "© KULMIS. جميع الحقوق محفوظة.",
+  "sheetPharmacyProfile": "ملف الصيدلية",
+  "fieldPharmacyName": "اسم الصيدلية",
+  "fieldAddress": "العنوان",
+  "fieldPhone": "الهاتف",
+  "fieldEmail": "البريد الإلكتروني",
+  "fieldLicense": "رقم الترخيص",
+  "fieldOwner": "المالك المسجل / المشرف",
+  "fieldCurrency": "رمز العملة",
+  "fieldTimezone": "المنطقة الزمنية (IANA)",
+  "fieldLogoUrl": "رابط الشعار (اختياري)",
+  "fieldTaxRate": "معدل الضريبة (%)",
+  "salesTaxTitle": "ضريبة المبيعات",
+  "salesTaxDescription": "تُطبق على المبلغ الخاضع للضريبة بعد الخصومات عند الدفع (غير شامل).",
+  "receiptInvoiceTitle": "الإيصال والفاتورة",
+  "receiptFooterLabel": "ملاحظة التذييل (اختياري)",
+  "receiptFooterHint": "نص تنظيمي، سطر شكر…",
+  "receiptShowBarcode": "إظهار شريط الباركود على الإيصال",
+  "receiptShowBarcodeSubtitle": "كتلة باركود زخرفية تحت الإجمالي",
+  "changePasswordTitle": "تغيير كلمة المرور",
+  "changePasswordNew": "كلمة مرور جديدة",
+  "changePasswordConfirm": "تأكيد كلمة المرور",
+  "validationPharmacyNameRequired": "اسم الصيدلية مطلوب",
+  "validationTaxRateRange": "أدخل معدل ضريبة بين 0 و 100",
+  "validationPasswordLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "validationPasswordMismatch": "كلمتا المرور غير متطابقتين",
+  "validationPasswordSignupRules": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+  "authRecoveryVerifyLockedMinutes": "محاولات كثيرة. أعد المحاولة خلال {minutes} د.",
+  "@authRecoveryVerifyLockedMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordStrengthLabel": "قوة كلمة المرور",
+  "passwordStrengthWeak": "ضعيفة",
+  "passwordStrengthFair": "متوسطة",
+  "passwordStrengthGood": "جيدة",
+  "passwordStrengthStrong": "قوية",
+  "resetPasswordSuccessTitle": "تم تحديث كلمة المرور",
+  "authTooManyAttempts": "محاولات كثيرة جداً. حاول مرة أخرى بعد قليل.",
+  "validationMarginRange": "أدخل هامشًا بين 0 و 99.99",
+  "validationDecimalsRange": "أدخل عددًا صحيحًا من 0 إلى 6",
+  "snackPharmacySaved": "تم حفظ ملف الصيدلية",
+  "snackTaxUpdated": "تم تحديث معدل الضريبة",
+  "snackInvoiceSaved": "تم حفظ إعدادات الفاتورة",
+  "snackPasswordUpdated": "تم تحديث كلمة المرور",
+  "snackLocaleUpdated": "تم تحديث اللغة",
+  "snackSaveFailed": "فشل الحفظ",
+  "pricingSheetTitle": "التسعير",
+  "pricingProfitMargin": "هامش الربح الافتراضي (%)",
+  "pricingProfitHint": "يُستخدم كدليل عند تسعير الأدوية",
+  "pricingDecimalPlaces": "منازل عشرية للأسعار",
+  "pricingDiscountBehavior": "سلوك الخصم",
+  "pricingDiscountPerLine": "تطبيق على بنود السطر",
+  "pricingDiscountOnTotal": "تطبيق على إجمالي الإيصال",
+  "pricingTaxInclusive": "عرض شامل للضريبة",
+  "pricingTaxInclusiveSubtitle": "إظهار المبالغ شاملة الضريبة حيث يُدعم",
+  "notificationsLowStock": "تنبيهات نقص المخزون",
+  "notificationsLowStockSubtitle": "إبراز عند انخفاض الكمية عن الحد",
+  "notificationsExpiry": "تنبيهات الصلاحية",
+  "notificationsExpirySubtitle": "إظهار الدفعات قرب انتهاء الصلاحية",
+  "notificationsDebt": "تذكيرات الديون",
+  "notificationsDebtSubtitle": "تنبيهات أرصدة العملاء",
+  "notificationsSound": "الأصوات",
+  "notificationsVibrate": "الاهتزاز",
+  "receiptPaperSize": "حجم الورق",
+  "receiptPrintQuality": "جودة الطباعة",
+  "printQualityDraft": "مسودة",
+  "printQualityNormal": "عادي",
+  "printQualityHigh": "عالية",
+  "paperSizeDefault": "افتراضي",
+  "paperSizeThermal58": "حراري 58 مم",
+  "paperSizeThermal80": "حراري 80 مم",
+  "paperSizeA4": "A4",
+  "regionUseDevice": "مطابقة الجهاز",
+  "regionSomalia": "الصومال",
+  "regionGeneric": "دولي",
+  "dateFormatSystem": "افتراضي النظام",
+  "dateFormatDdMmYyyy": "DD/MM/YYYY",
+  "dateFormatMmDdYyyy": "MM/DD/YYYY",
+  "dateFormatYyyyMmDd": "YYYY-MM-DD",
+  "numberFormatSystem": "افتراضي النظام",
+  "numberFormatWestern": "غربي (0–9)",
+  "numberFormatArabicIndic": "أرقام هندية عربية",
+  "staffTemplatesTitle": "قوالب الصلاحيات",
+  "staffTemplatesSubtitle": "حزم مسبقة لأمين الصندوق والصيدلي والمدير",
+  "staffTemplatesSnack": "تُطبق القوالب عند إنشاء الموظفين أو تعديلهم في وحدة الموظفين.",
+  "staffSecurityTitle": "قواعد أمان الموظفين",
+  "staffSecuritySubtitle": "كلمات مرور قوية وتقييد الإجراءات الحساسة للمسؤولين",
+  "staffSecuritySnack": "اضبط الأدوار والوصول من الموظفين. الإجراءات الحساسة للمسؤولين فقط.",
+  "settingsReceiptExtrasOpen": "الطباعة والورق",
+  "settingsReceiptExtrasSummary": "حجم الورق وجودة الطباعة وشريط الباركود",
+  "settingsTaxRateCurrent": "المعدل الحالي: {rate}%",
+  "settingsInvoicePreviewFooter": "{snippet} · الباركود {state}",
+  "settingsInvoicePreviewEmpty": "نص التذييل · شريط الباركود",
+  "settingsGeneralContactLine": "{phone} · {email}",
+  "settingsGeneralCurrencyLine": "{currency} · {timezone}",
+  "featuresHubTitle": "كل الميزات",
+  "featuresHubSubtitlePharmacy": "وحدات صيدليتك",
+  "featuresHubSubtitlePlatform": "وحدة التحكم بالمنصة",
+  "featuresClose": "إغلاق",
+  "featuresPermissionsError": "تعذر تحميل الصلاحيات.",
+  "platformSearchModules": "بحث في المنصة",
+  "platformSearchNoMatches": "لا توجد نتائج",
+  "commonBack": "رجوع",
+  "commonNext": "التالي",
+  "commonContinue": "متابعة",
+  "commonSkip": "تخطي",
+  "commonEmail": "البريد الإلكتروني",
+  "validationEmailInvalid": "أدخل عنوان بريد إلكتروني صالحًا",
+  "authWelcomeBack": "مرحبًا بعودتك",
+  "authWorkEmailLabel": "البريد الإلكتروني للعمل",
+  "authPasswordLabel": "كلمة المرور",
+  "authForgotPasswordLink": "نسيت كلمة المرور؟",
+  "authSignInButton": "تسجيل الدخول",
+  "authRegisterPharmacyLink": "تسجيل صيدلية جديدة",
+  "authPharmacySignInTitle": "تسجيل دخول الصيدلية",
+  "authPharmacySignInSubtitle": "استخدم بريد الصيدلية وكلمة المرور.",
+  "profileTitle": "الملف الشخصي",
+  "profileSubtitle": "حسابك وتفضيلاتك",
+  "profileSectionPreferences": "التفضيلات",
+  "profileLanguageOpen": "لغة التطبيق",
+  "profileThemeTitle": "المظهر",
+  "profileThemeSystem": "النظام",
+  "profileThemeLight": "فاتح",
+  "profileThemeDark": "داكن",
+  "profilePharmacySettings": "إعدادات الصيدلية",
+  "profilePharmacySettingsSubtitle": "التسعير والإيصالات والموظفون والعمليات",
+  "profileSubscriptionOpen": "الاشتراك والفوترة",
+  "profileChangePassword": "تغيير كلمة المرور",
+  "profileAccountLabel": "مسجّل الدخول كـ",
+  "profileLogout": "تسجيل الخروج",
+  "registerPharmacyTitle": "إنشاء صيدليتك",
+  "registerPharmacySubtitle": "إعداد مساحة العمل وحساب المالك.",
+  "registerSubmitCta": "إنشاء الصيدلية وتسجيل الدخول",
+  "registerLicenseHelper": "اختياري — أضف رقم الرخصة عند توفره",
+  "registerPhoneRequired": "رقم الهاتف مطلوب.",
+  "registerOwnerRequired": "اسم المالك مطلوب.",
+  "registerSessionMissing": "الجلسة غير موجودة. سجّل الدخول بدلاً من ذلك.",
+  "registerDuplicateHelp": "هذا البريد مسجّل مسبقاً. سجّل الدخول بكلمة المرور الصحيحة أو أعد التعيين.",
+  "registerVerifyEmailFirst": "أكّد بريدك من الرابط المرسل، ثم سجّل الدخول أو أعد المحاولة.",
+  "registerGenericError": "تعذر إكمال التسجيل.",
+  "registerFieldPharmacyName": "اسم الصيدلية",
+  "registerNameRequired": "اسم الصيدلية مطلوب.",
+  "registerFieldOwnerName": "الاسم الكامل للمالك",
+  "registerFieldPhone": "رقم الهاتف",
+  "registerFieldAddressOptional": "العنوان (اختياري)",
+  "registerFieldLicenseOptional": "رقم الرخصة (اختياري)",
+  "registerLogoSubtitle": "اختياري. يظهر على الفواتير والإيصالات بعد إنشاء الصيدلية.",
+  "registerLogoGallery": "المعرض",
+  "registerLogoCamera": "الكاميرا",
+  "registerLogoRemove": "إزالة الشعار",
+  "registerLogoApplyFail": "تم إنشاء الصيدلية، لكن تعذر حفظ الشعار. أضفه من إعدادات الصيدلية.",
+  "registerLogoInvalidFormat": "يُرجى اختيار صورة بصيغة PNG أو JPG أو WEBP.",
+  "registerLogoButton": "شعار الصيدلية",
+  "resetPasswordTitle": "اختر كلمة مرور جديدة",
+  "resetPasswordSubtitle": "أدخل كلمة مرور قوية وأكدها.",
+  "resetPasswordSubmit": "تحديث كلمة المرور",
+  "resetPasswordDone": "تم تحديث كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.",
+  "resetPasswordInvalidLink": "لا يوجد جلسة إعادة تعيين نشطة. استخدم «نسيت كلمة المرور» لطلب رمز، أو افتح رابط إعادة التعيين من البريد في تطبيق الويب.",
+  "resetPasswordBackToSignIn": "العودة لتسجيل الدخول",
+  "superAdminLoginTitle": "تسجيل دخول المشغّل",
+  "superAdminLoginSubtitle": "إدارة المنصة — ليس لموظفي الصيدلية.",
+  "superAdminAccessDenied": "هذا الحساب غير مخوّل للوصول كمشغّل.",
+  "superAdminPharmacyPortalLink": "تسجيل دخول تطبيق الصيدلية",
+  "authVerifyEmailLink": "أحتاج إلى التحقق من بريدي",
+  "authSignInFailed": "فشل تسجيل الدخول: {error}",
+  "@authSignInFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authCheckEmailConfirm": "تحقق من بريدك لتأكيد حسابك.",
+  "authForgotTitle": "إعادة تعيين كلمة المرور",
+  "authForgotSubtitle": "نرسل إلى بريدك رمزاً مكوّناً من 6 أرقام من KPMS. أدخله هنا ثم اختر كلمة مرور جديدة — كل ذلك داخل التطبيق.",
+  "authForgotSendLink": "إرسال رمز التحقق",
+  "authForgotResetSent": "تم إرسال رمز التحقق. راجع بريدك ومجلد الرسائل غير المرغوب فيها.",
+  "authForgotHaveResetLink": "لدي رمز بالفعل",
+  "authRecoveryEmailHint": "افتح رسالة إعادة تعيين كلمة المرور من KPMS وأدخل الرمز المكوّن من 6 أرقام الظاهر فيها.",
+  "authRecoveryOtpExpiresIn": "ينتهي الرمز خلال {time}",
+  "@authRecoveryOtpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "authRecoveryOtpExpired": "انتهت صلاحية هذا الرمز. اضغط إعادة الإرسال للحصول على رمز جديد.",
+  "authRecoveryVerifyTitle": "أدخل رمز التحقق",
+  "authRecoveryCodeLabel": "رمز مكوّن من 6 أرقام",
+  "authRecoveryVerifyCta": "تحقق ومتابعة",
+  "authRecoveryResend": "إعادة إرسال الرمز",
+  "authRecoveryResendIn": "إعادة الإرسال خلال {seconds} ث",
+  "@authRecoveryResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authRecoveryResendAvailableIn": "إعادة الإرسال متاحة خلال {seconds} ثانية",
+  "@authRecoveryResendAvailableIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authOtpPaste": "لصق الرمز",
+  "passwordConfirmMatches": "كلمتا المرور متطابقتان",
+  "passwordConfirmDoesNotMatch": "كلمتا المرور غير متطابقتين بعد",
+  "authRecoveryWaitSend": "يُرجى الانتظار قبل طلب رمز جديد.",
+  "authRecoveryTooManyVerify": "محاولات خاطئة كثيرة. اطلب رمزاً جديداً أو حاول لاحقاً.",
+  "authRecoveryEditEmail": "استخدام بريد مختلف",
+  "authRecoveryCodeIncomplete": "أدخل رمز التحقق كاملاً كما في البريد.",
+  "authForgotSendFailed": "تعذر إرسال إعادة التعيين: {error}",
+  "@authForgotSendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyTitle": "تحقق من بريدك الإلكتروني",
+  "authVerifyBodyGeneric": "أرسلنا رابطًا إلى صندوقك. أكّده لتفعيل حساب الصيدلية.",
+  "authVerifyBodyWithEmail": "أرسلنا رابطًا إلى {email}. أكّده لتفعيل حسابك.",
+  "@authVerifyBodyWithEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyResend": "إعادة إرسال البريد",
+  "authVerifyBackSignIn": "العودة لتسجيل الدخول",
+  "authVerifyMissingEmail": "البريد مفقود. ارجع لتسجيل الدخول وحاول مرة أخرى.",
+  "authVerifySent": "تم إرسال بريد التحقق.",
+  "authVerifyResendFailed": "فشلت إعادة الإرسال: {error}",
+  "@authVerifyResendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardGetStarted": "ابدأ",
+  "onboardThemeDark": "المظهر: داكن (اضغط للنظام)",
+  "onboardThemeLight": "المظهر: فاتح (اضغط للداكن)",
+  "onboardThemeSystem": "المظهر: النظام (اضغط للفاتح)",
+  "onboardWelcomeTitle": "مرحبًا بك في {appName}",
+  "@onboardWelcomeTitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardWelcomeSubtitle": "عمليات صيدلية حديثة — المخزون ونقطة البيع والامتثال في مكان واحد.",
+  "onboardSellTitle": "بِع بثقة",
+  "onboardSellSubtitle": "دفع سريع وتسعير واضح ومدفوعات منظمة لكل كاونتر.",
+  "onboardAnalyticsTitle": "ركّز على المهم",
+  "onboardAnalyticsSubtitle": "التحليلات والتصدير تساعدك على تتبع الأداء دون تخمين.",
+  "onboardComfortTitle": "راحة في أي إضاءة",
+  "onboardComfortSubtitle": "بدّل المظهر في أي وقت — فاتح أو داكن أو حسب إعدادات النظام.",
+  "notFoundTitle": "الصفحة غير موجودة",
+  "notFoundGoDashboard": "الانتقال إلى لوحة التحكم",
+  "notFoundSignIn": "تسجيل الدخول",
+  "supabaseNotConfiguredTitle": "لم يتم تهيئة Supabase",
+  "supabaseNotConfiguredHint": "أضف SUPABASE_URL و SUPABASE_ANON_KEY (مفتاح anon العام فقط).",
+  "supabaseConfigHelpMobile": "تصحيح Android/iOS: ضع `.env` بجانب `pubspec.yaml` — يُنسخ إلى `assets/env/generated_debug.env` في بنيات Debug. ثم شغّل `flutter run` مرة أخرى.\nRelease/APK: املأ `assets/env/default.env` أو استخدم CI `--dart-define`.",
+  "supabaseConfigHelpWeb": "الويب: نفّذ `dart run tool/kpms_sync_root_env.dart` مرة، ثم `flutter run -d chrome`. أو استخدم `--dart-define-from-file=.env`.",
+  "supabaseConfigHelpDesktop": "سطح المكتب: انسخ `.env.example` → `.env` في جذر المشروع، ثم `flutter run`. الإصدارات تستخدم `assets/env/default.env` أو CI `--dart-define`.",
+  "supabaseConfigConsoleHint": "وحدة التحكم: ابحث عن أسطر `[kpms]`.",
+  "dashboardTitle": "لوحة التحكم",
+  "dashboardSubtitleOverview": "نظرة عامة",
+  "dashSectionSalesProfit": "المبيعات والربح",
+  "dashSectionSalesProfitHint": "تحليلات الجلسة المباشرة",
+  "dashEmptySalesAnalyticsTitle": "لا تحليلات مبيعات بعد",
+  "dashEmptySalesAnalyticsMessage": "سجّل المبيعات في نقطة البيع لرؤية الاتجاهات والأكثر مبيعًا هنا.",
+  "dashOpenPos": "فتح نقطة البيع",
+  "dashRevenueHiddenRole": "مخطط الإيرادات مخفي لدورك.",
+  "dashRevenueTrendPlaceholder": "يظهر اتجاه الإيراد اليومي عند توفر سلسلة زمنية.",
+  "dashDailySales": "المبيعات اليومية",
+  "dashRevenuePulse": "نبض الإيراد",
+  "dashTopSellingPlaceholder": "تظهر الكميات الأكثر مبيعًا بعد إتمام الدفع.",
+  "dashMonthlyTrendHidden": "الاتجاه الشهري مخفي لدورك.",
+  "dashMonthlySeriesPlaceholder": "تظهر السلسلة الشهرية مع تسجيل المزيد من أيام الدفع.",
+  "dashMonthlySales": "المبيعات الشهرية",
+  "dashMonthlyTrajectory": "المسار",
+  "dashSectionInventory": "رؤى المخزون",
+  "dashSectionInventoryHint": "المخزون والصلاحية والسرعة",
+  "dashSectionRecentActivity": "النشاط الأخير",
+  "dashSectionRecentActivityHint": "مبيعات ومشتريات ومدفوعات",
+  "dashEmptyRecentTitle": "لا نشاطًا حديثًا",
+  "dashEmptyRecentMessage": "ستظهر المبيعات والمشتريات ومدفوعات الموردين هنا عند استخدام النظام.",
+  "dashStartSale": "بدء بيع",
+  "dashKpiTotalSales": "إجمالي المبيعات",
+  "dashKpiThisMonth": "هذا الشهر",
+  "dashKpiCustomerCredits": "ذمم العملاء",
+  "dashKpiOpenAr": "ذمم مدينة مفتوحة",
+  "dashKpiSupplierDebts": "ذمم الموردين",
+  "dashKpiOpenAp": "ذمم دائنة مفتوحة",
+  "dashKpiTotalMedicines": "إجمالي الأدوية",
+  "dashKpiCatalogSkus": "وحدات SKU في الكتالوج",
+  "dashKpiLowStock": "مخزون منخفض",
+  "dashKpiBelowMinimum": "أقل من الحد الأدنى",
+  "dashKpiExpiringSoon": "تنتهي قريبًا",
+  "dashKpiWithin90Days": "خلال 90 يومًا",
+  "dashProfitTrend": "اتجاه الربح",
+  "dashProfitMtdSession": "منذ بداية الشهر (الجلسة)",
+  "dashHiddenForRole": "مخفي لدورك.",
+  "dashProfitHintBody": "يتحدّث الربح عند نشر هوامش أسطر الدفع من نقطة البيع. صدّر التقارير للمطابقة المحاسبية.",
+  "dashInsightLowStock": "مخزون منخفض",
+  "dashInsightLowStockAllOk": "جميع وحدات SKU فوق الحد الأدنى.",
+  "dashInsightExpiringSoon": "تنتهي قريبًا",
+  "dashInsightExpiringSkuCount": "{count} SKU خلال 90 يومًا.",
+  "@dashInsightExpiringSkuCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashInsightExpiringNone": "لا دفعات في نافذة 90 يومًا.",
+  "dashInsightFastSelling": "الأكثر مبيعًا",
+  "dashInsightVelocityPlaceholder": "سجّل المبيعات لملء السرعة.",
+  "dashRecentSaleTitle": "بيع {invoice}",
+  "@dashRecentSaleTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleWithAmount": "نقطة بيع · {amount} · {method}",
+  "@dashRecentSaleSubtitleWithAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleNoAmount": "نقطة بيع · {method}",
+  "@dashRecentSaleSubtitleNoAmount": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseTitle": "شراء {invoice}",
+  "@dashRecentPurchaseTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseSubtitle": "مشتريات · {supplier}",
+  "@dashRecentPurchaseSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSupplierPayment": "دفعة مورد",
+  "dashRecentSupplierPaymentSubtitle": "{supplier} · {amount}",
+  "@dashRecentSupplierPaymentSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashSupplierFallback": "مورد",
+  "dashStaffPermissionsTitle": "الموظفون والصلاحيات",
+  "dashStaffPermissionsHint": "الدعوات والأدوار وسجلات الوصول تبقى مركزية في الموظفين.",
+  "dashLowStockBanner": "{count, plural, one{تنبيه مخزون منخفض · صنف واحد} few{تنبيه مخزون منخفض · {count} أصناف} many{تنبيه مخزون منخفض · {count} صنفًا} other{تنبيه مخزون منخفض · {count} صنف}}",
+  "@dashLowStockBanner": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "dashSegmentDay": "يوم",
+  "dashSegmentWeek": "أسبوع",
+  "dashSegmentMonth": "شهر",
+  "dashInsightsTitle": "رؤى",
+  "dashMiniRevenue": "الإيراد",
+  "dashMiniProfitMo": "الربح (شهر)",
+  "dashMiniTopSku": "أعلى SKU",
+  "dashInsightCaptionDaily": "نبض المبيعات اليومية",
+  "dashInsightCaptionWeekly": "إيقاع أسبوعي",
+  "dashInsightCaptionMonthly": "مسار شهري",
+  "dashChartsEmptyHint": "تُملأ المخططات عند وجود مبيعات مسجّلة لهذه الفترة.",
+  "dashFinancialChartHiddenRole": "المخطط المالي مخفي لدورك.",
+  "dashTopSellersTitle": "الأكثر مبيعًا",
+  "dashUnitsSoldSession": "الوحدات المباعة (الجلسة)",
+  "dashLowStockListTitle": "مخزون منخفض",
+  "dashLowStockListAllOk": "جميع وحدات SKU فوق الحد الأدنى",
+  "dashSalesTrendTitle": "اتجاه المبيعات",
+  "dashChartRecentPoints": "نقاط حديثة ({count})",
+  "@dashChartRecentPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashChartTrendPoints": "اتجاه ({count} نقطة)",
+  "@dashChartTrendPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashReview": "مراجعة",
+  "dashTopSellingLine": "{name} · {units} وحدة",
+  "@dashTopSellingLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  }
+}

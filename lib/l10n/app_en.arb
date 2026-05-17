@@ -1,0 +1,639 @@
+{
+  "@@locale": "en",
+  "appTitle": "KPMS",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonRetry": "Retry",
+  "commonEdit": "Edit",
+  "commonClose": "Close",
+  "commonUpdate": "Update",
+  "commonLoading": "Loading…",
+  "commonNotSet": "Not set",
+  "commonOn": "On",
+  "commonOff": "Off",
+  "shellAllModules": "All modules",
+  "shellBack": "Back",
+  "shellHome": "Home",
+  "shellNotifications": "Notifications",
+  "shellToggleTheme": "Toggle theme",
+  "drawerAllModulesTagline": "All modules",
+  "drawerPharmacySection": "Pharmacy",
+  "drawerPlatformSection": "Platform (Super Admin)",
+  "dockHome": "Home",
+  "dockPos": "POS",
+  "dockAll": "All",
+  "dockAlerts": "Alerts",
+  "dockSettings": "Settings",
+  "dockReports": "Reports",
+  "navDashboardTitle": "Dashboard",
+  "navDashboardSubtitle": "Overview and quick actions",
+  "navMedicinesTitle": "Medicines",
+  "navMedicinesSubtitle": "Catalog, batches, and expiry",
+  "navInventoryTitle": "Inventory",
+  "navInventorySubtitle": "Stock levels and alerts",
+  "navPosTitle": "Sales",
+  "navPosSubtitle": "Manage daily pharmacy sales",
+  "navSalesReturnsTitle": "Sales returns",
+  "navSalesReturnsSubtitle": "Refunds and stock restore",
+  "navDebtsTitle": "Debts & credit",
+  "navDebtsSubtitle": "Customer AR and supplier AP",
+  "navPurchasesTitle": "Purchases",
+  "navPurchasesSubtitle": "Track supplier purchases",
+  "navPurchaseReturnsTitle": "Purchase returns",
+  "navPurchaseReturnsSubtitle": "Supplier credits and stock",
+  "navSuppliersTitle": "Suppliers",
+  "navSuppliersSubtitle": "Contacts and payments",
+  "navCustomersTitle": "Customers",
+  "navCustomersSubtitle": "Profiles and visit history",
+  "navPrescriptionsTitle": "Prescriptions",
+  "navPrescriptionsSubtitle": "Upload and verify scripts",
+  "navStaffTitle": "Staff",
+  "navStaffSubtitle": "Roles and permissions",
+  "navReportsTitle": "Reports",
+  "navReportsSubtitle": "Analytics and business insights",
+  "navTransactionsTitle": "Transactions",
+  "navTransactionsSubtitle": "Sales, purchases, returns, exports",
+  "navSubscriptionsTitle": "Subscription",
+  "navSubscriptionsSubtitle": "Plans and billing",
+  "navNotificationsTitle": "Notifications",
+  "navNotificationsSubtitle": "Alerts and reminders",
+  "navSettingsTitle": "Settings",
+  "navSettingsSubtitle": "Pharmacy profile and security",
+  "navBarcodeTitle": "Barcode scan",
+  "navBarcodeSubtitle": "Fast lookup and POS add",
+  "navProfileTitle": "Profile",
+  "navProfileSubtitle": "Account, language, and sign out",
+  "navSuperHomeTitle": "Super Admin home",
+  "navSuperHomeSubtitle": "Platform KPIs",
+  "navSuperPharmaciesTitle": "All pharmacies",
+  "navSuperPharmaciesSubtitle": "Tenant directory",
+  "navSuperPlansTitle": "Subscription plans",
+  "navSuperPlansSubtitle": "Create & edit plans",
+  "navSuperSupportTitle": "Support tickets",
+  "navSuperSupportSubtitle": "Help desk",
+  "navSuperAnnouncementsTitle": "Announcements",
+  "navSuperAnnouncementsSubtitle": "Broadcast to tenants",
+  "navSuperRevenueTitle": "Revenue & analytics",
+  "navSuperRevenueSubtitle": "MRR, ARR, and platform sales",
+  "navSuperUsersTitle": "Users & directory",
+  "navSuperUsersSubtitle": "Active accounts across tenants",
+  "navSuperApprovalsTitle": "Approvals",
+  "navSuperApprovalsSubtitle": "New pharmacy onboarding",
+  "navSuperAuditTitle": "Audit logs",
+  "navSuperAuditSubtitle": "Immutable activity trail",
+  "navSuperSessionsTitle": "Active sessions",
+  "navSuperSessionsSubtitle": "Sign-in footprint",
+  "navSuperMonitoringTitle": "System health",
+  "navSuperMonitoringSubtitle": "Latency, errors, quotas",
+  "navSuperGlobalSettingsTitle": "Global settings",
+  "navSuperGlobalSettingsSubtitle": "Feature flags & policies",
+  "platformRememberDevice": "Remember this device",
+  "platformRememberDeviceHint": "Preference is saved on this device. You can sign out from Profile in the pharmacy app.",
+  "authSignOut": "Sign out",
+  "settingsTitle": "Settings",
+  "settingsSubtitle": "Pharmacy profile, pricing, and security",
+  "settingsLoadError": "Could not load pharmacy settings",
+  "settingsNoPharmacy": "No pharmacy is linked to this account. Complete registration first.",
+  "settingsRestoringWorkspace": "Restoring your pharmacy workspace…",
+  "settingsRetryingProfile": "Retrying profile connection…",
+  "settingsLicenseNotSet": "License not set",
+  "settingsSectionGeneral": "General",
+  "settingsSectionRegionFormats": "Region & formats",
+  "settingsSectionPricing": "Pricing",
+  "settingsSectionReceipts": "Receipt & invoice",
+  "settingsSectionNotifications": "Notifications",
+  "settingsSectionStaff": "Staff & permissions",
+  "settingsSectionSecurity": "Security",
+  "settingsSectionAppearance": "Appearance",
+  "settingsSectionAbout": "About",
+  "settingsHeroEdit": "Edit profile",
+  "settingsGeneralSummary": "Name, logo, contact, currency, and timezone",
+  "settingsGeneralOpen": "Open general settings",
+  "settingsLanguageRegionSummary": "Language, region, and formats",
+  "settingsLanguagePick": "App language",
+  "settingsRegion": "Region",
+  "settingsDateFormat": "Date format",
+  "settingsNumberFormat": "Number format",
+  "settingsPricingSummary": "Margins, tax, decimals, and discounts",
+  "settingsPricingOpen": "Open pricing settings",
+  "settingsReceiptSummary": "Footer, print options, and barcode strip",
+  "settingsReceiptOpen": "Open receipt settings",
+  "settingsNotificationSummary": "Stock, expiry, debt, and alerts",
+  "settingsNotificationOpen": "Notification preferences",
+  "settingsStaffSummary": "Roles, templates, and staff security",
+  "settingsStaffOpen": "Manage staff",
+  "settingsSecuritySummary": "Password, sessions, and device access",
+  "settingsAboutOpen": "Version, legal, and support",
+  "settingsDarkMode": "Dark mode",
+  "settingsThemeModeLight": "Light",
+  "settingsThemeModeDark": "Dark",
+  "settingsThemeModeSystem": "Follow system",
+  "settingsManageSubscription": "Manage subscription",
+  "settingsTaxOpen": "Tax configuration",
+  "settingsTaxSubtitle": "Sales tax at checkout",
+  "settingsInvoiceOpen": "Receipt & invoice template",
+  "settingsSessionTitle": "Sessions",
+  "settingsSessionSubtitle": "You are signed in on this device via Supabase Auth",
+  "settingsSessionSnack": "Sign out below to end this session. Other devices use their own login.",
+  "settingsSignOutTitle": "Sign out",
+  "settingsSignOutSubtitle": "End session on this device",
+  "settingsPasswordTitle": "Password",
+  "settingsPasswordSubtitle": "Change password for this account",
+  "settingsOptionalPinTitle": "PIN / biometric lock",
+  "settingsOptionalPinSubtitle": "Optional device lock — coming in a future update",
+  "languageEnglish": "English",
+  "languageSomali": "Somali",
+  "languageArabic": "Arabic",
+  "languageSheetTitle": "App language",
+  "languageSheetHint": "The interface updates immediately. Your choice is saved on this device and synced to the pharmacy account when possible.",
+  "aboutTitle": "About",
+  "aboutAppName": "KULMIS Pharmacy Management System",
+  "aboutVersionLabel": "Version",
+  "aboutBuildLabel": "Build",
+  "aboutDeveloper": "Developer",
+  "aboutDeveloperValue": "KULMIS",
+  "aboutTerms": "Terms of service",
+  "aboutPrivacy": "Privacy policy",
+  "aboutContact": "Contact & support",
+  "aboutContactValue": "support@kulmis.example",
+  "aboutTermsBody": "Use KPMS in accordance with your pharmacy license and local regulations. Features and availability may change with updates.",
+  "aboutPrivacyBody": "Operational data is processed to run your pharmacy workspace. Review your organization’s data processing agreement for full details.",
+  "aboutCopyright": "© KULMIS. All rights reserved.",
+  "sheetPharmacyProfile": "Pharmacy profile",
+  "fieldPharmacyName": "Pharmacy name",
+  "fieldAddress": "Address",
+  "fieldPhone": "Phone",
+  "fieldEmail": "Email",
+  "fieldLicense": "License number",
+  "fieldOwner": "Registered owner / superintendent",
+  "fieldCurrency": "Currency code",
+  "fieldTimezone": "Timezone (IANA)",
+  "fieldLogoUrl": "Logo URL (optional)",
+  "fieldTaxRate": "Tax rate (%)",
+  "salesTaxTitle": "Sales tax",
+  "salesTaxDescription": "Applied to the taxable amount after discounts at checkout (exclusive).",
+  "receiptInvoiceTitle": "Receipt & invoice",
+  "receiptFooterLabel": "Footer note (optional)",
+  "receiptFooterHint": "Regulatory text, thank-you line…",
+  "receiptShowBarcode": "Show barcode strip on receipt",
+  "receiptShowBarcodeSubtitle": "Decorative barcode block under totals",
+  "changePasswordTitle": "Change password",
+  "changePasswordNew": "New password",
+  "changePasswordConfirm": "Confirm password",
+  "validationPharmacyNameRequired": "Pharmacy name is required",
+  "validationTaxRateRange": "Enter a tax rate between 0 and 100",
+  "validationPasswordLength": "Password must be at least 6 characters",
+  "validationPasswordMismatch": "Passwords do not match",
+  "validationPasswordSignupRules": "Password must be at least 8 characters",
+  "authRecoveryVerifyLockedMinutes": "Too many attempts. Try again in {minutes} min.",
+  "@authRecoveryVerifyLockedMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "passwordStrengthLabel": "Password strength",
+  "passwordStrengthWeak": "Weak",
+  "passwordStrengthFair": "Fair",
+  "passwordStrengthGood": "Good",
+  "passwordStrengthStrong": "Strong",
+  "resetPasswordSuccessTitle": "Password updated",
+  "authTooManyAttempts": "Too many attempts. Try again in a moment.",
+  "validationMarginRange": "Enter a margin between 0 and 99.99",
+  "validationDecimalsRange": "Enter a whole number from 0 to 6",
+  "snackPharmacySaved": "Pharmacy profile saved",
+  "snackTaxUpdated": "Tax rate updated",
+  "snackInvoiceSaved": "Invoice settings saved",
+  "snackPasswordUpdated": "Password updated",
+  "snackLocaleUpdated": "Language updated",
+  "snackSaveFailed": "Save failed",
+  "pricingSheetTitle": "Pricing",
+  "pricingProfitMargin": "Default profit margin (%)",
+  "pricingProfitHint": "Used as a guide when pricing medicines",
+  "pricingDecimalPlaces": "Price decimal places",
+  "pricingDiscountBehavior": "Discount behavior",
+  "pricingDiscountPerLine": "Apply to line items",
+  "pricingDiscountOnTotal": "Apply to receipt total",
+  "pricingTaxInclusive": "Tax-inclusive display",
+  "pricingTaxInclusiveSubtitle": "Show tax-included amounts where supported",
+  "notificationsLowStock": "Low stock alerts",
+  "notificationsLowStockSubtitle": "Highlight when quantity is below threshold",
+  "notificationsExpiry": "Expiry alerts",
+  "notificationsExpirySubtitle": "Surface batches nearing expiry",
+  "notificationsDebt": "Debt reminders",
+  "notificationsDebtSubtitle": "Customer balance nudges",
+  "notificationsSound": "Sounds",
+  "notificationsVibrate": "Vibration",
+  "receiptPaperSize": "Paper size",
+  "receiptPrintQuality": "Print quality",
+  "printQualityDraft": "Draft",
+  "printQualityNormal": "Normal",
+  "printQualityHigh": "High",
+  "paperSizeDefault": "Default",
+  "paperSizeThermal58": "Thermal 58 mm",
+  "paperSizeThermal80": "Thermal 80 mm",
+  "paperSizeA4": "A4",
+  "regionUseDevice": "Match device",
+  "regionSomalia": "Somalia",
+  "regionGeneric": "International",
+  "dateFormatSystem": "System default",
+  "dateFormatDdMmYyyy": "DD/MM/YYYY",
+  "dateFormatMmDdYyyy": "MM/DD/YYYY",
+  "dateFormatYyyyMmDd": "YYYY-MM-DD",
+  "numberFormatSystem": "System default",
+  "numberFormatWestern": "Western (0–9)",
+  "numberFormatArabicIndic": "Arabic-Indic digits",
+  "staffTemplatesTitle": "Permission templates",
+  "staffTemplatesSubtitle": "Preset bundles for cashier, pharmacist, and manager",
+  "staffTemplatesSnack": "Templates are applied when creating or editing staff in the Staff module.",
+  "staffSecurityTitle": "Staff security rules",
+  "staffSecuritySubtitle": "Require strong passwords and limit destructive actions to admins",
+  "staffSecuritySnack": "Configure roles and route access from Staff. Sensitive actions stay with pharmacy admins.",
+  "settingsReceiptExtrasOpen": "Print & paper",
+  "settingsReceiptExtrasSummary": "Paper size, print quality, and barcode strip",
+  "settingsTaxRateCurrent": "Current rate: {rate}%",
+  "@settingsTaxRateCurrent": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsInvoicePreviewFooter": "{snippet} · barcode {state}",
+  "@settingsInvoicePreviewFooter": {
+    "placeholders": {
+      "snippet": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsInvoicePreviewEmpty": "Footer text · barcode strip",
+  "settingsGeneralContactLine": "{phone} · {email}",
+  "@settingsGeneralContactLine": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsGeneralCurrencyLine": "{currency} · {timezone}",
+  "@settingsGeneralCurrencyLine": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "timezone": {
+        "type": "String"
+      }
+    }
+  },
+  "featuresHubTitle": "All features",
+  "featuresHubSubtitlePharmacy": "Your pharmacy modules",
+  "featuresHubSubtitlePlatform": "Platform console",
+  "featuresClose": "Close",
+  "featuresPermissionsError": "Could not load permissions.",
+  "platformSearchModules": "Search platform",
+  "platformSearchNoMatches": "No matches",
+  "commonBack": "Back",
+  "commonNext": "Next",
+  "commonContinue": "Continue",
+  "commonSkip": "Skip",
+  "commonEmail": "Email",
+  "validationEmailInvalid": "Enter a valid email address",
+  "authWelcomeBack": "Welcome back",
+  "authWorkEmailLabel": "Work email",
+  "authPasswordLabel": "Password",
+  "authForgotPasswordLink": "Forgot password?",
+  "authSignInButton": "Sign in",
+  "authRegisterPharmacyLink": "Register a new pharmacy",
+  "authPharmacySignInTitle": "Pharmacy sign in",
+  "authPharmacySignInSubtitle": "Use your pharmacy workspace email and password.",
+  "profileTitle": "Profile",
+  "profileSubtitle": "Your account and preferences",
+  "profileSectionPreferences": "Preferences",
+  "profileLanguageOpen": "App language",
+  "profileThemeTitle": "Theme",
+  "profileThemeSystem": "System",
+  "profileThemeLight": "Light",
+  "profileThemeDark": "Dark",
+  "profilePharmacySettings": "Pharmacy settings",
+  "profilePharmacySettingsSubtitle": "Pricing, receipts, staff, and operations",
+  "profileSubscriptionOpen": "Subscription & billing",
+  "profileChangePassword": "Change password",
+  "profileAccountLabel": "Signed in as",
+  "profileLogout": "Sign out",
+  "registerPharmacyTitle": "Create your pharmacy",
+  "registerPharmacySubtitle": "Set up your workspace and owner account.",
+  "registerSubmitCta": "Create pharmacy & sign in",
+  "registerLicenseHelper": "Optional — add your license when you have it",
+  "registerPhoneRequired": "Phone number is required.",
+  "registerOwnerRequired": "Owner name is required.",
+  "registerSessionMissing": "Session missing. Sign in instead.",
+  "registerDuplicateHelp": "This email already has an account. Sign in with the correct password or reset it.",
+  "registerVerifyEmailFirst": "Confirm your email from the inbox link, then sign in or try again here.",
+  "registerGenericError": "Registration could not be completed.",
+  "registerFieldPharmacyName": "Pharmacy name",
+  "registerNameRequired": "Pharmacy name is required.",
+  "registerFieldOwnerName": "Owner full name",
+  "registerFieldPhone": "Phone number",
+  "registerFieldAddressOptional": "Address (optional)",
+  "registerFieldLicenseOptional": "License number (optional)",
+  "registerLogoSubtitle": "Optional. Shown on invoices and receipts after your pharmacy is created.",
+  "registerLogoGallery": "Gallery",
+  "registerLogoCamera": "Camera",
+  "registerLogoRemove": "Remove logo",
+  "registerLogoApplyFail": "Pharmacy was created, but the logo could not be saved. Add it in Pharmacy settings.",
+  "registerLogoInvalidFormat": "Please choose a PNG, JPG, or WEBP image.",
+  "registerLogoButton": "Pharmacy logo",
+  "resetPasswordTitle": "Choose a new password",
+  "resetPasswordSubtitle": "Enter and confirm a strong password for your account.",
+  "resetPasswordSubmit": "Update password",
+  "resetPasswordDone": "Password updated. Sign in with your new password.",
+  "resetPasswordInvalidLink": "No active reset session. Use Forgot password to request a code, or open the reset link from email on the web app.",
+  "resetPasswordBackToSignIn": "Back to sign in",
+  "superAdminLoginTitle": "Operator sign in",
+  "superAdminLoginSubtitle": "Platform administration — not for pharmacy staff.",
+  "superAdminAccessDenied": "This account is not authorized for operator access.",
+  "superAdminPharmacyPortalLink": "Pharmacy app sign in",
+  "authVerifyEmailLink": "I need to verify my email",
+  "authSignInFailed": "Sign in failed: {error}",
+  "@authSignInFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authCheckEmailConfirm": "Check your email to confirm your account.",
+  "authForgotTitle": "Reset password",
+  "authForgotSubtitle": "We email you a 6-digit code from KPMS. Enter it here, then choose a new password — everything stays in this app.",
+  "authForgotSendLink": "Send verification code",
+  "authForgotResetSent": "Verification code sent. Check your email and spam folder.",
+  "authForgotHaveResetLink": "I already have a code",
+  "authRecoveryEmailHint": "Open the KPMS password reset email and enter the 6-digit code shown there.",
+  "authRecoveryOtpExpiresIn": "Code expires in {time}",
+  "@authRecoveryOtpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "authRecoveryOtpExpired": "This code has expired. Tap Resend to get a new one.",
+  "authRecoveryVerifyTitle": "Enter verification code",
+  "authRecoveryCodeLabel": "6-digit code",
+  "authRecoveryVerifyCta": "Verify and continue",
+  "authRecoveryResend": "Resend code",
+  "authRecoveryResendIn": "Resend in {seconds}s",
+  "@authRecoveryResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authRecoveryResendAvailableIn": "Resend available in {seconds} seconds",
+  "@authRecoveryResendAvailableIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authOtpPaste": "Paste code",
+  "passwordConfirmMatches": "Passwords match",
+  "passwordConfirmDoesNotMatch": "Passwords do not match yet",
+  "authRecoveryWaitSend": "Please wait before requesting another code.",
+  "authRecoveryTooManyVerify": "Too many incorrect codes. Request a new code or try again later.",
+  "authRecoveryEditEmail": "Use a different email",
+  "authRecoveryCodeIncomplete": "Enter the full verification code from your email.",
+  "authForgotSendFailed": "Could not send reset: {error}",
+  "@authForgotSendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyTitle": "Verify your email",
+  "authVerifyBodyGeneric": "We sent a link to your inbox. Confirm it to activate your pharmacy account.",
+  "authVerifyBodyWithEmail": "We sent a link to {email}. Confirm it to activate your account.",
+  "@authVerifyBodyWithEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "authVerifyResend": "Resend email",
+  "authVerifyBackSignIn": "Back to sign in",
+  "authVerifyMissingEmail": "Missing email. Return to sign in and try again.",
+  "authVerifySent": "Verification email sent.",
+  "authVerifyResendFailed": "Resend failed: {error}",
+  "@authVerifyResendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardGetStarted": "Get started",
+  "onboardThemeDark": "Theme: dark (tap to use system)",
+  "onboardThemeLight": "Theme: light (tap to use dark)",
+  "onboardThemeSystem": "Theme: system (tap to use light)",
+  "onboardWelcomeTitle": "Welcome to {appName}",
+  "@onboardWelcomeTitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardWelcomeSubtitle": "Modern pharmacy operations — inventory, POS, and compliance in one place.",
+  "onboardSellTitle": "Sell with confidence",
+  "onboardSellSubtitle": "Fast checkout, clear pricing, and structured payments for every counter.",
+  "onboardAnalyticsTitle": "See what matters",
+  "onboardAnalyticsSubtitle": "Analytics and exports help you track performance without guesswork.",
+  "onboardComfortTitle": "Comfort in any lighting",
+  "onboardComfortSubtitle": "Switch theme anytime — light, dark, or follow your system settings.",
+  "notFoundTitle": "Page not found",
+  "notFoundGoDashboard": "Go to dashboard",
+  "notFoundSignIn": "Sign in",
+  "supabaseNotConfiguredTitle": "Supabase not configured",
+  "supabaseNotConfiguredHint": "Add SUPABASE_URL and SUPABASE_ANON_KEY (public anon key only).",
+  "supabaseConfigHelpMobile": "Debug Android/iOS: put `.env` next to `pubspec.yaml` — it is copied into `assets/env/generated_debug.env` during Debug builds. Then run `flutter run` again.\nRelease/APK: fill `assets/env/default.env` or use CI `--dart-define`.",
+  "supabaseConfigHelpWeb": "Web: run `dart run tool/kpms_sync_root_env.dart` once, then `flutter run -d chrome`. Or use `--dart-define-from-file=.env`.",
+  "supabaseConfigHelpDesktop": "Desktop: copy `.env.example` → `.env` in the project root, then `flutter run`. Release builds use bundled `assets/env/default.env` or CI `--dart-define`.",
+  "supabaseConfigConsoleHint": "Console: look for `[kpms]` lines.",
+  "dashboardTitle": "Dashboard",
+  "dashboardSubtitleOverview": "Overview",
+  "dashSectionSalesProfit": "Sales & profit",
+  "dashSectionSalesProfitHint": "Live session analytics",
+  "dashEmptySalesAnalyticsTitle": "No sales analytics yet",
+  "dashEmptySalesAnalyticsMessage": "Record sales in POS to see trends and top-selling lines here.",
+  "dashOpenPos": "Open POS",
+  "dashRevenueHiddenRole": "Revenue trend is hidden for your role.",
+  "dashRevenueTrendPlaceholder": "Daily revenue trend appears when a time series is available.",
+  "dashDailySales": "Daily sales",
+  "dashRevenuePulse": "Revenue pulse",
+  "dashTopSellingPlaceholder": "Top-selling quantities appear after checkout.",
+  "dashMonthlyTrendHidden": "Monthly trend is hidden for your role.",
+  "dashMonthlySeriesPlaceholder": "Monthly series appears as you record more checkout days.",
+  "dashMonthlySales": "Monthly sales",
+  "dashMonthlyTrajectory": "Trajectory",
+  "dashSectionInventory": "Inventory insights",
+  "dashSectionInventoryHint": "Stock, expiry, velocity",
+  "dashSectionRecentActivity": "Recent activity",
+  "dashSectionRecentActivityHint": "Sales, purchases, payments",
+  "dashEmptyRecentTitle": "No recent activity",
+  "dashEmptyRecentMessage": "Sales, purchases, and supplier payments will appear here as you use the system.",
+  "dashStartSale": "Start sale",
+  "dashKpiTotalSales": "Total sales",
+  "dashKpiThisMonth": "This month",
+  "dashKpiCustomerCredits": "Customer credits",
+  "dashKpiOpenAr": "Open AR",
+  "dashKpiSupplierDebts": "Supplier debts",
+  "dashKpiOpenAp": "Open AP",
+  "dashKpiTotalMedicines": "Total medicines",
+  "dashKpiCatalogSkus": "Catalog SKUs",
+  "dashKpiLowStock": "Low stock",
+  "dashKpiBelowMinimum": "Below minimum",
+  "dashKpiExpiringSoon": "Expiring soon",
+  "dashKpiWithin90Days": "Within 90 days",
+  "dashProfitTrend": "Profit trend",
+  "dashProfitMtdSession": "Month to date (session)",
+  "dashHiddenForRole": "Hidden for your role.",
+  "dashProfitHintBody": "Profit updates as checkout lines post margin from POS. Export reports for accounting reconciliation.",
+  "dashInsightLowStock": "Low stock",
+  "dashInsightLowStockAllOk": "All SKUs above minimum.",
+  "dashInsightExpiringSoon": "Expiring soon",
+  "dashInsightExpiringSkuCount": "{count} SKU within 90 days.",
+  "@dashInsightExpiringSkuCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashInsightExpiringNone": "No batches in the 90-day window.",
+  "dashInsightFastSelling": "Fast selling",
+  "dashInsightVelocityPlaceholder": "Record sales to populate velocity.",
+  "dashRecentSaleTitle": "Sale {invoice}",
+  "@dashRecentSaleTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleWithAmount": "POS · {amount} · {method}",
+  "@dashRecentSaleSubtitleWithAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSaleSubtitleNoAmount": "POS · {method}",
+  "@dashRecentSaleSubtitleNoAmount": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseTitle": "Purchase {invoice}",
+  "@dashRecentPurchaseTitle": {
+    "placeholders": {
+      "invoice": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentPurchaseSubtitle": "Purchases · {supplier}",
+  "@dashRecentPurchaseSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "dashRecentSupplierPayment": "Supplier payment",
+  "dashRecentSupplierPaymentSubtitle": "{supplier} · {amount}",
+  "@dashRecentSupplierPaymentSubtitle": {
+    "placeholders": {
+      "supplier": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "dashSupplierFallback": "Supplier",
+  "dashStaffPermissionsTitle": "Staff & permissions",
+  "dashStaffPermissionsHint": "Invites, roles, and access trails stay centralized in Staff.",
+  "dashLowStockBanner": "{count, plural, one{Low stock alert · 1 SKU} other{Low stock alert · {count} SKUs}}",
+  "@dashLowStockBanner": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "dashSegmentDay": "Day",
+  "dashSegmentWeek": "Week",
+  "dashSegmentMonth": "Month",
+  "dashInsightsTitle": "Insights",
+  "dashMiniRevenue": "Revenue",
+  "dashMiniProfitMo": "Profit (mo)",
+  "dashMiniTopSku": "Top SKU",
+  "dashInsightCaptionDaily": "Daily sales pulse",
+  "dashInsightCaptionWeekly": "Weekly rhythm",
+  "dashInsightCaptionMonthly": "Monthly trajectory",
+  "dashChartsEmptyHint": "Charts populate when recorded sales exist for this period.",
+  "dashFinancialChartHiddenRole": "Financial chart hidden for your role.",
+  "dashTopSellersTitle": "Top sellers",
+  "dashUnitsSoldSession": "Units sold (session)",
+  "dashLowStockListTitle": "Low stock",
+  "dashLowStockListAllOk": "All SKUs above minimum",
+  "dashSalesTrendTitle": "Sales trend",
+  "dashChartRecentPoints": "Recent points ({count})",
+  "@dashChartRecentPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashChartTrendPoints": "Trend ({count} points)",
+  "@dashChartTrendPoints": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dashReview": "Review",
+  "dashTopSellingLine": "{name} · {units} u",
+  "@dashTopSellingLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  }
+}
