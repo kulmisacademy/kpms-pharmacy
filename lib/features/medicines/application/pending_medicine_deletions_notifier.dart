@@ -12,17 +12,32 @@ final pendingMedicineDeletionsProvider =
 });
 
 class PendingMedicineDeletionsNotifier extends StateNotifier<List<String>> {
-  PendingMedicineDeletionsNotifier(this._ref) : super(const []) {
-    _load();
-  }
+  PendingMedicineDeletionsNotifier(this._ref) : super(const []);
 
   final Ref _ref;
+  String? _loadedTenantId;
 
   static String _prefsKey(String tenantId) => 'kpms_pending_med_deletes_v1_$tenantId';
 
-  Future<void> _load() async {
-    final tid = _ref.read(kpmsActiveTenantIdProvider).valueOrNull;
-    if (tid == null || tid.isEmpty) return;
+  Future<void> reloadForTenant(String tenantId) async {
+    final tid = tenantId.trim();
+    if (tid.isEmpty) {
+      state = const [];
+      _loadedTenantId = null;
+      return;
+    }
+    _loadedTenantId = tid;
+    await _load(tid);
+  }
+
+  Future<void> clearForTenantSwitch() async {
+    state = const [];
+    _loadedTenantId = null;
+  }
+
+  Future<void> _load(String tenantId) async {
+    final tid = tenantId.trim();
+    if (tid.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_prefsKey(tid));
     if (raw == null || raw.isEmpty) return;
@@ -34,8 +49,15 @@ class PendingMedicineDeletionsNotifier extends StateNotifier<List<String>> {
     } catch (_) {}
   }
 
-  Future<void> _persist() async {
+  Future<void> _ensureLoaded() async {
     final tid = _ref.read(kpmsActiveTenantIdProvider).valueOrNull;
+    if (tid == null || tid.isEmpty) return;
+    if (_loadedTenantId == tid) return;
+    await reloadForTenant(tid);
+  }
+
+  Future<void> _persist() async {
+    final tid = _loadedTenantId ?? _ref.read(kpmsActiveTenantIdProvider).valueOrNull;
     if (tid == null || tid.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     if (state.isEmpty) {
@@ -46,6 +68,7 @@ class PendingMedicineDeletionsNotifier extends StateNotifier<List<String>> {
   }
 
   Future<void> enqueue(String clientId) async {
+    await _ensureLoaded();
     final id = clientId.trim();
     if (id.isEmpty || state.contains(id)) return;
     state = [...state, id];

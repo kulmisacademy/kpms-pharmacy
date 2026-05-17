@@ -13,6 +13,7 @@ import '../../../core/staff/kpms_staff_rbac_log.dart';
 import '../../../core/supabase/pharmacy_operational_gate.dart';
 import '../../../core/supabase/pharmacy_operational_warning_provider.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
+import '../../../core/sync/kpms_realtime_log.dart';
 import '../../../core/sync/kpms_sync_log.dart';
 import '../../../providers/pharmacy_local_workspace.dart';
 import '../../../features/enterprise/application/pharmacy_enterprise_bootstrap.dart';
@@ -54,13 +55,16 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
     }
   }
 
-  void _scheduleResync(String table) {
+  void _scheduleResync(String table, String tenantId) {
     KpmsSyncLog.realtimeEvent(table);
+    KpmsRealtimeLog.realtimeReceived(table: table, tenantId: tenantId);
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 900), () {
       if (!mounted) return;
       KpmsPerformanceLog.realtimeBatched(channel: 'kpms_workspace', debounceMs: 900);
+      KpmsRealtimeLog.workspaceRefreshScheduled(tenantId: tenantId, triggerTable: table);
       ref.read(pharmacyCloudSyncGenerationProvider.notifier).state++;
+      ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
       ref.invalidate(pharmacyWorkspaceBootstrapProvider);
       ref.invalidate(pharmacyEnterpriseBootstrapProvider);
       ref.read(pharmacyEnterpriseSyncGenerationProvider.notifier).state++;
@@ -105,7 +109,7 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
             ref.read(pharmacyCloudNotificationSignalProvider.notifier).state++;
             return;
           }
-          _scheduleResync(table);
+          _scheduleResync(table, tenantId);
         },
       );
     }
@@ -152,6 +156,7 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
         ref.invalidate(pharmacySubscriptionBannerProvider);
       },
     );
+    KpmsRealtimeLog.subscribed(tenantId: tenantId, tableCount: 13);
     ch.subscribe();
     _channel = ch;
     _subscribedTenantId = tenantId;

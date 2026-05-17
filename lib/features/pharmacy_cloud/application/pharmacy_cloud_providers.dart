@@ -13,3 +13,6 @@ final pharmacyWorkspaceSyncServiceProvider = Provider<PharmacyWorkspaceSyncServi
 
 /// Increment to trigger workspace re-pull from cloud (e.g. after realtime event).
 final pharmacyCloudSyncGenerationProvider = StateProvider<int>((ref) => 0);
+
+/// False while [pharmacyWorkspaceBootstrapProvider] is loading — blocks stale auto-push.
+final pharmacyWorkspaceBootstrapReadyProvider = StateProvider<bool>((ref) => false);

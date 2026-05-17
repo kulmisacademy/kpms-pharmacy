@@ -61,18 +61,22 @@ void _hydrateWorkspace(
   KpmsTenantLog.workspaceLoaded(tenantId);
 }
 
-/// Hybrid bootstrap: clear boundary → local cache → cloud (source of truth for this tenant only).
+/// Hybrid bootstrap: cloud pull + merge → single hydrate (avoids stale pre-cloud auto-push).
 final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
   ref.watch(pharmacyCloudSyncGenerationProvider);
+  ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
+
   final uid = ref.watch(supabaseAuthUserIdProvider).valueOrNull;
   final tenantId = await ref.watch(kpmsActiveTenantIdProvider.future);
 
   if (uid == null || tenantId == null || tenantId.isEmpty) {
     clearOperationalWorkspace(ref, reason: 'no_tenant');
+    ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
     return;
   }
 
   ensureWorkspaceTenantBoundary(ref, userId: uid, tenantId: tenantId);
+  await ref.read(pendingMedicineDeletionsProvider.notifier).reloadForTenant(tenantId);
 
   final local = await KpmsPharmacyWorkspaceStore.load(tenantId, userId: uid);
   final localMeds = local?.medicines ?? const [];
@@ -81,55 +85,61 @@ final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
   final localDebts = local?.debtCustomers ?? const [];
   final localSuppliers = local?.suppliers ?? const [];
 
-  if (local != null) {
-    KpmsPersistenceLog.workspaceRestored(
+  try {
+    final sync = ref.read(pharmacyWorkspaceSyncServiceProvider);
+    final bundle = await sync.bootstrapWorkspace(
       tenantId: tenantId,
-      hasData: KpmsPharmacyWorkspaceStore.bundleHasBusinessData(
+      localMedicines: localMeds,
+      localSales: localSales,
+      localPurchases: localPurchases,
+      localDebtCustomers: localDebts,
+      localSuppliers: localSuppliers,
+    );
+
+    if (bundle != null) {
+      _hydrateWorkspace(
+        ref,
+        tenantId: tenantId,
+        userId: uid,
+        medicines: bundle.medicines,
+        sales: bundle.sales,
+        purchases: bundle.purchases,
+        debtCustomers: bundle.debtCustomers,
+        suppliers: bundle.suppliers,
+      );
+      KpmsPersistenceLog.workspaceLoaded(
+        tenantId: tenantId,
+        hasData: KpmsPharmacyWorkspaceStore.bundleHasBusinessData(
+          medicines: bundle.medicines,
+          sales: bundle.sales,
+          purchases: bundle.purchases,
+          debtCustomers: bundle.debtCustomers,
+          suppliers: bundle.suppliers,
+        ),
+      );
+      KpmsSyncLog.workspaceRefreshed(
+        tenantId: tenantId,
+        medicines: bundle.medicines.length,
+        source: 'bootstrap',
+      );
+    } else if (local != null) {
+      _hydrateWorkspace(
+        ref,
+        tenantId: tenantId,
+        userId: uid,
         medicines: localMeds,
         sales: localSales,
         purchases: localPurchases,
         debtCustomers: localDebts,
         suppliers: localSuppliers,
-      ),
-    );
-    _hydrateWorkspace(
-      ref,
-      tenantId: tenantId,
-      userId: uid,
-      medicines: localMeds,
-      sales: localSales,
-      purchases: localPurchases,
-      debtCustomers: localDebts,
-      suppliers: localSuppliers,
-    );
-  }
-
-  final sync = ref.read(pharmacyWorkspaceSyncServiceProvider);
-  final bundle = await sync.bootstrapWorkspace(
-    tenantId: tenantId,
-    localMedicines: localMeds,
-    localSales: localSales,
-    localPurchases: localPurchases,
-    localDebtCustomers: localDebts,
-    localSuppliers: localSuppliers,
-  );
-
-  if (bundle != null) {
-    _hydrateWorkspace(
-      ref,
-      tenantId: tenantId,
-      userId: uid,
-      medicines: bundle.medicines,
-      sales: bundle.sales,
-      purchases: bundle.purchases,
-      debtCustomers: bundle.debtCustomers,
-      suppliers: bundle.suppliers,
-    );
-  } else if (local == null) {
-    clearOperationalWorkspace(ref, reason: 'empty_tenant_workspace');
-    ensureWorkspaceTenantBoundary(ref, userId: uid, tenantId: tenantId);
-  } else {
-    KpmsPersistenceLog.workspaceRecovered(tenantId: tenantId, reason: 'cloud_bootstrap_empty_kept_local');
+      );
+      KpmsPersistenceLog.workspaceRecovered(tenantId: tenantId, reason: 'cloud_unavailable_used_local');
+    } else {
+      clearOperationalWorkspace(ref, reason: 'empty_tenant_workspace');
+      ensureWorkspaceTenantBoundary(ref, userId: uid, tenantId: tenantId);
+    }
+  } finally {
+    ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = true;
   }
 });
 
@@ -162,6 +172,7 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
   double _bannerOpacity = 0;
   Timer? _bannerShowDebounce;
   Timer? _bannerHideDebounce;
+  bool _bootstrapReady = false;
 
   Future<void> _refreshSyncUi() async {
     if (!mounted) return;
@@ -317,15 +328,20 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
       if (_connectivityOffline) {
         _connectivityOffline = false;
         KpmsSyncLog.reconnectDetected();
-        KpmsSyncLog.syncRetry('connectivity_restored: flush workspace to cloud');
+        KpmsSyncLog.syncRetry('connectivity_restored: pull cloud then flush outbox');
         unawaited(_refreshSyncUi());
-        _schedulePersist();
+        ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
+        ref.invalidate(pharmacyWorkspaceBootstrapProvider);
         _scheduleOutboxReplay();
       }
     });
   }
 
   void _schedulePersist() {
+    if (!_bootstrapReady) {
+      KpmsSyncLog.bootstrapGatedPush(allowed: false, reason: 'bootstrap_in_progress');
+      return;
+    }
     _localTimer?.cancel();
     _cloudTimer?.cancel();
     _localTimer = Timer(const Duration(milliseconds: 500), () => _saveLocal());
@@ -417,7 +433,7 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
   }
 
   Future<void> _pushCloud() async {
-    if (!mounted || _workspacePushInFlight) return;
+    if (!mounted || _workspacePushInFlight || !_bootstrapReady) return;
     final tid = _activeTenantId ?? ref.read(kpmsActiveTenantIdProvider).valueOrNull;
     final uid = _activeUserId ?? ref.read(supabaseAuthUserIdProvider).valueOrNull;
     if (tid == null || tid.isEmpty) return;
@@ -492,6 +508,20 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     final tid = ref.watch(kpmsActiveTenantIdProvider).valueOrNull;
     if (tid != null && tid.isNotEmpty) _activeTenantId = tid;
     if (uid != null) _activeUserId = uid;
+
+    final bootstrap = ref.watch(pharmacyWorkspaceBootstrapProvider);
+    bootstrap.when(
+      data: (_) => _bootstrapReady = ref.read(pharmacyWorkspaceBootstrapReadyProvider),
+      loading: () => _bootstrapReady = false,
+      error: (e, st) => _bootstrapReady = true,
+    );
+
+    ref.listen(pharmacyWorkspaceBootstrapReadyProvider, (prev, next) {
+      if (next && prev == false && mounted) {
+        KpmsSyncLog.bootstrapGatedPush(allowed: true, reason: 'bootstrap_complete');
+        _scheduleOutboxReplay();
+      }
+    });
 
     ref.listen(medicineCatalogProvider, (_, _) => _schedulePersist());
     ref.listen(salesLedgerProvider, (_, _) => _schedulePersist());

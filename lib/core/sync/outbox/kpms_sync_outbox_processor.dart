@@ -42,6 +42,7 @@ abstract final class KpmsSyncOutboxProcessor {
 
   static Future<void> processDue(WidgetRef ref) async {
     if (_busy) return;
+    if (!ref.read(pharmacyWorkspaceBootstrapReadyProvider)) return;
     _busy = true;
     try {
       final uid = ref.read(supabaseAuthUserIdProvider).valueOrNull;
@@ -82,6 +83,7 @@ abstract final class KpmsSyncOutboxProcessor {
             await KpmsSyncOutboxService.clearPendingBulkForTenant(tid, entityType: KpmsSyncEntityType.workspace);
             await KpmsSyncOutboxService.deleteRow(row.id);
             KpmsSyncLog.uploadSuccess(tenantId: tid);
+            KpmsSyncLog.outboxSynced(tenantId: tid, processed: 1);
             processed++;
             continue;
           }

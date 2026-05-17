@@ -23,13 +23,11 @@ class PharmacyCloudRepository {
   Future<bool> hasCloudData(String tenantId) async {
     final c = _client;
     if (c == null) return false;
-    final row = await c
-        .from('pharmacy_inventory')
-        .select('id')
-        .eq('tenant_id', tenantId)
-        .limit(1)
-        .maybeSingle();
-    return row != null;
+    for (final table in ['pharmacy_inventory', 'pharmacy_sales', 'pharmacy_purchases']) {
+      final row = await c.from(table).select('id').eq('tenant_id', tenantId).limit(1).maybeSingle();
+      if (row != null) return true;
+    }
+    return false;
   }
 
   Future<({

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
@@ -10,6 +12,7 @@ import '../../features/enterprise/application/medicine_categories_notifier.dart'
 import '../../features/enterprise/application/pharmacy_expenses_notifier.dart';
 import '../../features/enterprise/application/product_barcodes_notifier.dart';
 
+import '../../features/medicines/application/pending_medicine_deletions_notifier.dart';
 import '../../features/medicines/data/medicine_catalog_notifier.dart';
 
 import '../../features/purchases/application/purchase_ledger_notifier.dart';
@@ -115,6 +118,8 @@ void clearOperationalWorkspace(Object ref, {String? reason}) {
   _isoRead(ref, pharmacyExpensesProvider.notifier).replaceAll([]);
   _isoRead(ref, medicineCategoriesProvider.notifier).replaceAll([]);
   _isoRead(ref, productBarcodesProvider.notifier).replaceAll([]);
+
+  unawaited(_isoRead(ref, pendingMedicineDeletionsProvider.notifier).clearForTenantSwitch());
 
   _isoRead(ref, kpmsLoadedWorkspaceTenantProvider.notifier).state = null;
 

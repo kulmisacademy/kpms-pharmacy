@@ -13,8 +13,12 @@ abstract final class KpmsSyncLog {
 
   static void uploadSuccess({required String tenantId}) => _emit('upload_success', tenantId);
 
-  static void uploadCompleted({required String tenantId, int rows = 0}) =>
-      _emit('upload_completed', '$tenantId rows=$rows');
+  static void uploadCompleted({
+    required String tenantId,
+    int rows = 0,
+    int medicines = 0,
+  }) =>
+      _emit('upload_completed', '$tenantId rows=$rows meds=$medicines');
 
   static void uploadFailed(String detail) => _emit('upload_failed', detail);
 
@@ -42,6 +46,41 @@ abstract final class KpmsSyncLog {
   static void pullStarted(String tenantId) => _emit('pull_started', tenantId);
 
   static void pullCompleted(String tenantId) => _emit('pull_completed', tenantId);
+
+  static void cloudPullCompleted({
+    required String tenantId,
+    required int medicines,
+    required int sales,
+    required int purchases,
+    required bool cloudHas,
+  }) =>
+      _emit(
+        'cloud_pull_completed',
+        'tenant=$tenantId meds=$medicines sales=$sales purchases=$purchases cloudHas=$cloudHas',
+      );
+
+  static void cloudPullSkipped({required String tenantId, required String reason}) =>
+      _emit('cloud_pull_skipped', 'tenant=$tenantId reason=$reason');
+
+  static void workspaceMerged({
+    required String direction,
+    required int medicineCount,
+    required int localOnlyMedicines,
+  }) =>
+      _emit('workspace_merged', '$direction meds=$medicineCount localOnly=$localOnlyMedicines');
+
+  static void workspaceRefreshed({
+    required String tenantId,
+    required int medicines,
+    required String source,
+  }) =>
+      _emit('workspace_refreshed', 'tenant=$tenantId meds=$medicines source=$source');
+
+  static void outboxSynced({required String tenantId, required int processed}) =>
+      _emit('outbox_synced', 'tenant=$tenantId processed=$processed');
+
+  static void bootstrapGatedPush({required bool allowed, required String reason}) =>
+      _emit('bootstrap_gated_push', 'allowed=$allowed reason=$reason');
 
   static void realtimeEvent(String table) => _emit('realtime_event', table);
 
