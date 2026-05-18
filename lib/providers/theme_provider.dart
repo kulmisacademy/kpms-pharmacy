@@ -4,14 +4,31 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/constants/app_prefs_keys.dart';
 
+/// Initial mode resolved synchronously after [preloadInitialThemeMode] runs in `main()`.
+/// Defaults to system when not yet preloaded.
+ThemeMode _initialThemeMode = ThemeMode.system;
+
+/// Reads SharedPreferences once and caches the persisted theme so [ThemeModeNotifier]
+/// can start with the user's preference (no light → dark flash).
+Future<void> preloadInitialThemeMode() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    _initialThemeMode = ThemeModeNotifier._parse(prefs.getString(AppPrefsKeys.themeMode));
+  } catch (_) {
+    _initialThemeMode = ThemeMode.system;
+  }
+}
+
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.system) {
-    _load();
+  ThemeModeNotifier() : super(_initialThemeMode) {
+    _syncFromPrefs();
   }
 
-  Future<void> _load() async {
+  /// Reconciles state in case [preloadInitialThemeMode] wasn't awaited (cold cache).
+  Future<void> _syncFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    state = _parse(prefs.getString(AppPrefsKeys.themeMode));
+    final next = _parse(prefs.getString(AppPrefsKeys.themeMode));
+    if (next != state) state = next;
   }
 
   static ThemeMode _parse(String? raw) => switch (raw) {

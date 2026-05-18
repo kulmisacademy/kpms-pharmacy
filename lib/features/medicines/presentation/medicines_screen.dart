@@ -12,6 +12,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/kpms_empty_state.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
+import '../../../core/widgets/kpms_skeleton.dart';
+import '../../../providers/pharmacy_local_workspace.dart';
+import '../../pharmacy_cloud/application/pharmacy_cloud_providers.dart';
 import '../application/medicine_catalog_insights_provider.dart';
 import '../application/medicine_catalog_stats.dart';
 import '../data/medicine_catalog_notifier.dart';
@@ -186,6 +189,9 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
     final gutter = KpmsBreakpoints.pagePaddingHorizontal(screenW);
     final canManage = ref.watch(kpmsCanManageInventoryProvider);
     final useCompactActions = isMobile(context);
+    final bootstrapReady = ref.watch(pharmacyWorkspaceBootstrapReadyProvider);
+    final bootstrapAsync = ref.watch(pharmacyWorkspaceBootstrapProvider);
+    final showSkeleton = rows.isEmpty && (!bootstrapReady || bootstrapAsync.isLoading);
 
     return KpmsPageShell(
       title: 'Medicines',
@@ -296,13 +302,15 @@ class _MedicinesScreenState extends ConsumerState<MedicinesScreen> {
             ),
           ),
           if (filtered.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
-              child: KpmsEmptyState(
-                title: 'No medicines match',
-                message: 'Adjust search or filters — or add a new medicine.',
-                icon: Icons.medication_rounded,
-              ),
+              child: showSkeleton
+                  ? const KpmsListSkeleton(rows: 6)
+                  : const KpmsEmptyState(
+                      title: 'No medicines match',
+                      message: 'Adjust search or filters — or add a new medicine.',
+                      icon: Icons.medication_rounded,
+                    ),
             )
           else ...[
             SliverPadding(

@@ -11,6 +11,7 @@ import 'core/monitoring/kpms_release_monitoring.dart';
 import 'core/performance/kpms_performance_log.dart';
 import 'core/supabase/kpms_supabase_auth_recovery.dart';
 import 'core/supabase/supabase_bootstrap.dart';
+import 'providers/theme_provider.dart';
 
 void _installGlobalErrorHandlers() {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -51,7 +52,10 @@ void _installGlobalErrorHandlers() {
 Future<void> _bootstrapApp() async {
   final sw = Stopwatch()..start();
   _installGlobalErrorHandlers();
-  await SupabaseBootstrap.init();
+  await Future.wait([
+    SupabaseBootstrap.init(),
+    preloadInitialThemeMode(),
+  ]);
   KpmsSupabaseAuthRecovery.install();
   runApp(const ProviderScope(child: KpmsApp()));
   sw.stop();

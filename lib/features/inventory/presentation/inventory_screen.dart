@@ -7,10 +7,13 @@ import '../../../core/navigation/kpms_breakpoints.dart';
 import '../../../core/utils/kpms_feedback.dart';
 import '../../../core/widgets/kpms_empty_state.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
+import '../../../core/widgets/kpms_skeleton.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
 import '../../medicines/presentation/widgets/medicine_manage_actions.dart';
 import '../../../core/auth/kpms_inventory_permission_provider.dart';
 import '../../../core/responsive/responsive_helpers.dart';
+import '../../../providers/pharmacy_local_workspace.dart';
+import '../../pharmacy_cloud/application/pharmacy_cloud_providers.dart';
 
 /// PRD §5.6 — Inventory (stock, adjustments, expiry, damaged).
 class InventoryScreen extends ConsumerStatefulWidget {
@@ -97,7 +100,12 @@ class _StockPanel extends ConsumerWidget {
     final meds = ref.watch(medicineCatalogProvider);
     final canManage = ref.watch(kpmsCanManageInventoryProvider);
     final compactActions = isMobile(context);
+    final bootstrapReady = ref.watch(pharmacyWorkspaceBootstrapReadyProvider);
+    final bootstrapAsync = ref.watch(pharmacyWorkspaceBootstrapProvider);
     if (meds.isEmpty) {
+      if (!bootstrapReady || bootstrapAsync.isLoading) {
+        return const KpmsListSkeleton(rows: 6);
+      }
       return KpmsEmptyState(
         icon: Icons.inventory_2_outlined,
         title: 'No stock records yet',

@@ -14,6 +14,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/kpms_feedback.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
+import '../../../core/widgets/kpms_skeleton.dart';
+import '../../../providers/pharmacy_local_workspace.dart';
+import '../../pharmacy_cloud/application/pharmacy_cloud_providers.dart';
 import '../../barcode/domain/barcode_scan_pop_result.dart';
 import '../../enterprise/application/product_barcodes_notifier.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
@@ -196,6 +199,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final filtered = meds.where((m) => _medicineMatchesQuery(m, q)).toList();
 
     final canManageCatalog = ref.watch(kpmsCanManageInventoryProvider);
+    final bootstrapReady = ref.watch(pharmacyWorkspaceBootstrapReadyProvider);
+    final bootstrapAsync = ref.watch(pharmacyWorkspaceBootstrapProvider);
+    final showCatalogSkeleton = meds.isEmpty && (!bootstrapReady || bootstrapAsync.isLoading);
     final catalog = _PosCatalogPane(
       controller: _search,
       viewMode: _viewMode,
@@ -206,6 +212,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       canManage: canManageCatalog,
       onEditMedicine: (m) => context.push(MedicineManageActions.editRouteFor(m)),
       onDeleteMedicine: (m) => MedicineManageActions.confirmAndDelete(context, ref, m),
+      showSkeleton: showCatalogSkeleton,
     );
 
     final cartPanel = _PosCartPanel(
@@ -214,6 +221,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       onEditSell: (line) => _editSell(context, ref, line),
     );
 
+    final viewportW = MediaQuery.sizeOf(context).width;
+    final expandedRailW = _posCartRailWidth(viewportW);
     final body = wide
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,7 +231,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 280),
                 curve: Curves.easeOutCubic,
-                width: _cartRailExpanded ? 420 : 56,
+                width: _cartRailExpanded ? expandedRailW : 56,
                 child: ClipRect(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -310,29 +319,38 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 }
 
-/// Grid column count + aspect ratio from actual catalog column width (fixes clipped Quick add on web).
+/// Grid column count + aspect ratio derived from a **target tile width** so wide screens
+/// scale naturally (5-7 columns on 1600+ desktops, instead of capping at 4).
 ({int cross, double aspect}) _posGridLayout(double catalogW, double pad) {
   const gap = 14.0;
-  final int cross;
-  if (catalogW < 280) {
-    cross = 1;
-  } else if (isDesktopWidth(catalogW)) {
-    if (catalogW >= 720) {
-      cross = 4;
-    } else if (catalogW >= 520) {
-      cross = 3;
-    } else {
-      cross = 2;
-    }
-  } else {
-    cross = 2;
-  }
+  final usableW = math.max(1.0, catalogW - pad * 2);
+
+  // Target tile width: denser on desktop, taller cards on mobile.
+  final double targetTileW = isDesktopWidth(catalogW)
+      ? 220
+      : isTabletWidth(catalogW)
+          ? 200
+          : 165;
+
+  int cross = ((usableW + gap) / (targetTileW + gap)).floor();
+  if (cross < 1) cross = 1;
+  if (catalogW < 280) cross = 1;
+  // Hard cap to keep cards readable on ultra-wide displays.
+  if (cross > 8) cross = 8;
+
   final totalGap = gap * (cross - 1);
-  final cellW = (catalogW - pad * 2 - totalGap) / cross;
+  final cellW = (usableW - totalGap) / cross;
   const targetH = 212.0;
   final raw = math.max(1.0, cellW) / targetH;
   final aspect = cross == 1 ? math.max(raw, 1.12) : math.max(raw, 0.52);
   return (cross: cross, aspect: aspect);
+}
+
+/// Width of the POS cart rail (desktop only) — scales with viewport.
+double _posCartRailWidth(double viewportW) {
+  if (viewportW >= 1700) return 460;
+  if (viewportW >= 1400) return 420;
+  return 380;
 }
 
 class _PosCatalogPane extends StatelessWidget {
@@ -346,6 +364,7 @@ class _PosCatalogPane extends StatelessWidget {
     required this.canManage,
     required this.onEditMedicine,
     required this.onDeleteMedicine,
+    this.showSkeleton = false,
   });
 
   final TextEditingController controller;
@@ -357,6 +376,7 @@ class _PosCatalogPane extends StatelessWidget {
   final bool canManage;
   final void Function(Medicine m) onEditMedicine;
   final Future<void> Function(Medicine m) onDeleteMedicine;
+  final bool showSkeleton;
 
   @override
   Widget build(BuildContext context) {
@@ -444,28 +464,30 @@ class _PosCatalogPane extends StatelessWidget {
           if (medicines.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inventory_2_outlined, size: 56, color: theme.hintColor),
-                      const SizedBox(height: 12),
-                      Text(
-                        'No matches',
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              child: showSkeleton
+                  ? const KpmsListSkeleton(rows: 6)
+                  : Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inventory_2_outlined, size: 56, color: theme.hintColor),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No matches',
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Try another name or barcode.',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Try another name or barcode.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
             )
           else ...[
             SliverPadding(
