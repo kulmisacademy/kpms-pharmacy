@@ -56,9 +56,10 @@ class PharmacySessionNotifier extends AsyncNotifier<PharmacySessionData?> {
     KpmsPersistenceLog.tenantRestorationStarted();
     try {
       await ProfileTenantGate.hasTenantLinked(client, uid).timeout(_restoreTimeout);
-      KpmsPersistenceLog.tenantRestorationCompleted(
-        tenantId: ProfileTenantGate.cachedTenantId(uid),
-      );
+      final tid = ProfileTenantGate.cachedTenantId(uid);
+      if (tid != null && tid.isNotEmpty) {
+        KpmsPersistenceLog.tenantRestorationCompleted(tenantId: tid);
+      }
     } on TimeoutException {
       KpmsPersistenceLog.tenantRestorationTimeout();
     }
