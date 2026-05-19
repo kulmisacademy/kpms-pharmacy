@@ -38,7 +38,7 @@ class PlatformAdminRepository {
       KpmsPlatformLog.directoryLoaded(rows: rows.length, detail: 'legacy_array');
       return (rows: rows, total: rows.length, limit: rows.length, offset: 0);
     } else {
-      return (rows: const [], total: 0, limit: limit, offset: offset);
+      return (rows: <Map<String, dynamic>>[], total: 0, limit: limit, offset: offset);
     }
 
     final rowsRaw = map['rows'];
