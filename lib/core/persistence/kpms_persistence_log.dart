@@ -47,6 +47,9 @@ abstract final class KpmsPersistenceLog {
   static void tenantBoundaryEnforced({required String from, required String to}) =>
       _emit('tenant_boundary', '$from → $to');
 
+  static void realtimePatchSaved({required String tenantId}) =>
+      _emit('realtime_patch_saved', 'tenant=$tenantId');
+
   static void lastPullRecorded({required String tenantId, required String iso}) =>
       _emit('last_pull_at', 'tenant=$tenantId at=$iso');
 }

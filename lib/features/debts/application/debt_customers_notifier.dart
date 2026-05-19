@@ -18,6 +18,31 @@ class DebtCustomersNotifier extends StateNotifier<List<DebtCustomer>> {
     state = List<DebtCustomer>.from(next);
   }
 
+  void reconcileWorkspace(List<DebtCustomer> remote) => replaceAll(remote);
+
+  bool mergeWorkspaceEntity(DebtCustomer incoming) {
+    final idx = state.indexWhere((c) => c.id == incoming.id);
+    if (idx < 0) {
+      state = [incoming, ...state];
+      return true;
+    }
+    final existing = state[idx];
+    if (existing.name == incoming.name &&
+        existing.phoneKey == incoming.phoneKey &&
+        existing.notes == incoming.notes) {
+      return false;
+    }
+    state = [
+      for (final c in state)
+        if (c.id == incoming.id) incoming else c,
+    ];
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    state = state.where((c) => c.id != clientId).toList();
+  }
+
   List<DebtCustomer> search(String raw) {
     final q = raw.trim().toLowerCase();
     final digits = _phoneKey(raw);

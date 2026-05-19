@@ -44,6 +44,61 @@ class SalesLedgerNotifier extends StateNotifier<SalesLedgerState> {
     state = next;
   }
 
+  /// Full ledger replace (bootstrap only — not for realtime).
+  void reconcileWorkspace(SalesLedgerState remote) {
+    hydrate(remote);
+  }
+
+  /// Upsert by invoice number; returns true when memory changed.
+  bool mergeWorkspaceEntity(CompletedSaleInvoice incoming) {
+    final idx = state.invoices.indexWhere((i) => i.invoiceNumber == incoming.invoiceNumber);
+    if (idx < 0) {
+      final next = [incoming, ...state.invoices]
+        ..sort((a, b) => b.issuedAt.compareTo(a.issuedAt));
+      state = state.copyWith(invoices: next);
+      return true;
+    }
+    final existing = state.invoices[idx];
+    if (existing.issuedAt.isAfter(incoming.issuedAt)) return false;
+    if (existing.issuedAt == incoming.issuedAt &&
+        existing.total == incoming.total &&
+        existing.paidTowardInvoice == incoming.paidTowardInvoice &&
+        existing.lines.length == incoming.lines.length) {
+      return false;
+    }
+    final next = [...state.invoices];
+    next[idx] = incoming;
+    next.sort((a, b) => b.issuedAt.compareTo(a.issuedAt));
+    state = state.copyWith(invoices: next);
+    return true;
+  }
+
+  bool mergeWorkspaceReturn(SalesReturnRecord incoming) {
+    final idx = state.returns.indexWhere((r) => r.returnInvoiceNumber == incoming.returnInvoiceNumber);
+    if (idx < 0) {
+      state = state.copyWith(returns: [incoming, ...state.returns]);
+      return true;
+    }
+    final existing = state.returns[idx];
+    if (!existing.issuedAt.isBefore(incoming.issuedAt)) return false;
+    final next = [...state.returns];
+    next[idx] = incoming;
+    state = state.copyWith(returns: next);
+    return true;
+  }
+
+  void removeWorkspaceEntity(String invoiceNumber) {
+    state = state.copyWith(
+      invoices: state.invoices.where((i) => i.invoiceNumber != invoiceNumber).toList(),
+    );
+  }
+
+  void removeWorkspaceReturn(String returnInvoiceNumber) {
+    state = state.copyWith(
+      returns: state.returns.where((r) => r.returnInvoiceNumber != returnInvoiceNumber).toList(),
+    );
+  }
+
   void addInvoice(CompletedSaleInvoice invoice) {
     state = state.copyWith(invoices: [invoice, ...state.invoices]);
     final tenantId = _ref.read(kpmsActiveTenantIdProvider).valueOrNull;

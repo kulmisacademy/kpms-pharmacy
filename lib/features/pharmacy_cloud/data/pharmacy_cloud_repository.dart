@@ -10,6 +10,7 @@ import '../../debts/domain/debt_customer.dart';
 import '../../medicines/domain/medicine.dart';
 import '../../purchases/application/purchase_ledger_notifier.dart';
 import '../../purchases/domain/purchase_invoice.dart';
+import '../../purchases/domain/purchase_return.dart';
 import '../../sales/application/sales_ledger_notifier.dart';
 import '../../sales/domain/completed_sale_invoice.dart';
 import '../../suppliers/domain/supplier.dart';
@@ -282,6 +283,74 @@ class PharmacyCloudRepository {
     }
     KpmsSyncLog.uploadCompleted(tenantId: tenantId, rows: rows);
     return rows;
+  }
+
+  Future<CompletedSaleInvoice?> fetchSaleByClientId(String tenantId, String clientId) async {
+    final c = _client;
+    if (c == null) return null;
+    final header = await c
+        .from('pharmacy_sales')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('client_id', clientId)
+        .maybeSingle();
+    if (header == null) return null;
+    final items = await c
+        .from('pharmacy_sale_items')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('sale_client_id', clientId);
+    return PharmacyCloudMapper.saleFromRows(
+      Map<String, dynamic>.from(header),
+      [for (final r in items) Map<String, dynamic>.from(r)],
+    );
+  }
+
+  Future<SalesReturnRecord?> fetchSaleReturnByClientId(String tenantId, String clientId) async {
+    final c = _client;
+    if (c == null) return null;
+    final row = await c
+        .from('pharmacy_sale_returns')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('client_id', clientId)
+        .maybeSingle();
+    if (row == null) return null;
+    return PharmacyCloudMapper.saleReturnFromRow(Map<String, dynamic>.from(row));
+  }
+
+  Future<PurchaseInvoice?> fetchPurchaseByClientId(String tenantId, String clientId) async {
+    final c = _client;
+    if (c == null) return null;
+    final header = await c
+        .from('pharmacy_purchases')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('client_id', clientId)
+        .maybeSingle();
+    if (header == null) return null;
+    final items = await c
+        .from('pharmacy_purchase_items')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('purchase_client_id', clientId);
+    return PharmacyCloudMapper.purchaseFromRows(
+      Map<String, dynamic>.from(header),
+      [for (final r in items) Map<String, dynamic>.from(r)],
+    );
+  }
+
+  Future<PurchaseReturnRecord?> fetchPurchaseReturnByClientId(String tenantId, String clientId) async {
+    final c = _client;
+    if (c == null) return null;
+    final row = await c
+        .from('pharmacy_purchase_returns')
+        .select()
+        .eq('tenant_id', tenantId)
+        .eq('client_id', clientId)
+        .maybeSingle();
+    if (row == null) return null;
+    return PharmacyCloudMapper.purchaseReturnFromRow(Map<String, dynamic>.from(row));
   }
 
   /// Row counts for sync integrity diagnostics (tenant-scoped).

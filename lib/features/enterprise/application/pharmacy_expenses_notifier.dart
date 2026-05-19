@@ -15,6 +15,23 @@ class PharmacyExpensesNotifier extends StateNotifier<List<PharmacyExpense>> {
       ..sort((a, b) => b.issuedAt.compareTo(a.issuedAt));
   }
 
+  bool mergeWorkspaceEntity(PharmacyExpense incoming) {
+    final idx = state.indexWhere((e) => e.id == incoming.id);
+    if (idx < 0) {
+      state = [incoming, ...state]..sort((a, b) => b.issuedAt.compareTo(a.issuedAt));
+      return true;
+    }
+    state = [
+      for (final e in state)
+        if (e.id == incoming.id) incoming else e,
+    ]..sort((a, b) => b.issuedAt.compareTo(a.issuedAt));
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    state = state.where((e) => e.id != clientId).toList();
+  }
+
   void add(PharmacyExpense expense) {
     state = [expense, ...state];
   }

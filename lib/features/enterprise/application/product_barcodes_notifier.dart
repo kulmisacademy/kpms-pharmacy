@@ -14,6 +14,23 @@ class ProductBarcodesNotifier extends StateNotifier<List<ProductBarcode>> {
     state = List<ProductBarcode>.from(next);
   }
 
+  bool mergeWorkspaceEntity(ProductBarcode incoming) {
+    final idx = state.indexWhere((b) => b.id == incoming.id);
+    if (idx < 0) {
+      state = [...state, incoming];
+      return true;
+    }
+    state = [
+      for (final b in state)
+        if (b.id == incoming.id) incoming else b,
+    ];
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    state = state.where((b) => b.id != clientId).toList();
+  }
+
   /// Returns error if barcode is invalid or already used in this tenant cache.
   String? validateNew(String raw, {String? excludeId}) {
     final code = ProductBarcode.normalize(raw);

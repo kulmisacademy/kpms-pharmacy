@@ -13,6 +13,31 @@ class SuppliersNotifier extends StateNotifier<List<Supplier>> {
     state = List<Supplier>.from(next);
   }
 
+  void reconcileWorkspace(List<Supplier> remote) => replaceAll(remote);
+
+  bool mergeWorkspaceEntity(Supplier incoming) {
+    final idx = state.indexWhere((s) => s.id == incoming.id);
+    if (idx < 0) {
+      state = [incoming, ...state];
+      return true;
+    }
+    final existing = state[idx];
+    if (existing.name == incoming.name &&
+        existing.balanceOwed == incoming.balanceOwed &&
+        existing.phone == incoming.phone) {
+      return false;
+    }
+    state = [
+      for (final s in state)
+        if (s.id == incoming.id) incoming else s,
+    ];
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    state = state.where((s) => s.id != clientId).toList();
+  }
+
   void addSupplier(Supplier s) {
     state = [s, ...state];
   }

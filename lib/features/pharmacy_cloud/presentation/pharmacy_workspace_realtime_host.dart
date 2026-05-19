@@ -8,19 +8,15 @@ import '../../../core/auth/kpms_permission_gate.dart';
 import '../../../core/auth/permission_providers.dart';
 import '../../../core/notifications/kpms_notification_log.dart';
 import '../../../core/notifications/pharmacy_notification_signal_provider.dart';
-import '../../../core/performance/kpms_performance_log.dart';
 import '../../../core/staff/kpms_staff_rbac_log.dart';
 import '../../../core/supabase/pharmacy_operational_gate.dart';
 import '../../../core/supabase/pharmacy_operational_warning_provider.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/sync/kpms_realtime_log.dart';
-import '../../../core/sync/kpms_sync_log.dart';
 import '../../../providers/pharmacy_local_workspace.dart';
-import '../../../features/enterprise/application/pharmacy_enterprise_bootstrap.dart';
-import '../../../features/enterprise/application/pharmacy_enterprise_providers.dart';
-import '../application/pharmacy_cloud_providers.dart';
+import '../application/workspace_realtime_reconciler.dart';
 
-/// Listens to Supabase Realtime for `pharmacy_*` changes and triggers cloud re-sync.
+/// Supabase Realtime → in-memory workspace delta patches (no bootstrap reload).
 class PharmacyWorkspaceRealtimeHost extends ConsumerStatefulWidget {
   const PharmacyWorkspaceRealtimeHost({super.key, required this.child});
 
@@ -32,7 +28,6 @@ class PharmacyWorkspaceRealtimeHost extends ConsumerStatefulWidget {
 
 class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspaceRealtimeHost> {
   RealtimeChannel? _channel;
-  Timer? _debounce;
   String? _subscribedTenantId;
   String? _subscribedUserId;
   Object? _subscribeEpoch;
@@ -44,41 +39,25 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
   }
 
   void _teardownChannel() {
-    _debounce?.cancel();
-    _debounce = null;
+    final tid = _subscribedTenantId ?? '';
     final ch = _channel;
     _channel = null;
     _subscribedTenantId = null;
     _subscribedUserId = null;
     if (ch != null) {
-      KpmsRealtimeLog.unsubscribed(tenantId: _subscribedTenantId ?? '');
+      KpmsRealtimeLog.unsubscribed(tenantId: tid);
       SupabaseBootstrap.clientOrNull?.removeChannel(ch);
     }
   }
 
-  static const _enterpriseOnlyTables = {
-    'pharmacy_expenses',
-    'pharmacy_medicine_categories',
-    'pharmacy_product_barcodes',
-  };
-
-  void _scheduleResync(String table, String tenantId) {
-    KpmsSyncLog.realtimeEvent(table);
-    KpmsRealtimeLog.realtimeReceived(table: table, tenantId: tenantId);
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 900), () {
-      if (!mounted) return;
-      KpmsPerformanceLog.realtimeBatched(channel: 'kpms_workspace', debounceMs: 900);
-      KpmsRealtimeLog.workspaceRefreshScheduled(tenantId: tenantId, triggerTable: table);
-      if (_enterpriseOnlyTables.contains(table)) {
-        ref.read(pharmacyEnterpriseSyncGenerationProvider.notifier).state++;
-        ref.invalidate(pharmacyEnterpriseBootstrapProvider);
-        return;
-      }
-      ref.read(pharmacyCloudSyncGenerationProvider.notifier).state++;
-      ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
-      ref.invalidate(pharmacyWorkspaceBootstrapProvider);
-    });
+  void _onWorkspaceChange(String table, String tenantId, PostgresChangePayload payload) {
+    unawaited(
+      ref.read(workspaceRealtimeReconcilerProvider).onPostgresChange(
+            table: table,
+            tenantId: tenantId,
+            payload: payload,
+          ),
+    );
   }
 
   void _subscribe(String tenantId, String userId) {
@@ -92,18 +71,22 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
     _teardownChannel();
 
     final ch = client.channel('kpms_workspace_$tenantId');
-    for (final table in [
+    const workspaceTables = [
       'pharmacy_inventory',
       'pharmacy_sales',
+      'pharmacy_sale_items',
+      'pharmacy_sale_returns',
       'pharmacy_purchases',
+      'pharmacy_purchase_items',
+      'pharmacy_purchase_returns',
       'pharmacy_customers',
       'pharmacy_suppliers',
-      'pharmacy_sale_returns',
-      'pharmacy_notifications',
       'pharmacy_expenses',
       'pharmacy_medicine_categories',
       'pharmacy_product_barcodes',
-    ]) {
+    ];
+
+    for (final table in workspaceTables) {
       ch.onPostgresChanges(
         event: PostgresChangeEvent.all,
         schema: 'public',
@@ -113,16 +96,43 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
           column: 'tenant_id',
           value: tenantId,
         ),
-        callback: (payload) {
-          if (table == 'pharmacy_notifications') {
-            KpmsNotificationLog.realtimeReceived(table: table);
-            ref.read(pharmacyCloudNotificationSignalProvider.notifier).state++;
-            return;
-          }
-          _scheduleResync(table, tenantId);
-        },
+        callback: (payload) => _onWorkspaceChange(table, tenantId, payload),
       );
     }
+
+    ch.onPostgresChanges(
+      event: PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'pharmacy_notifications',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'tenant_id',
+        value: tenantId,
+      ),
+      callback: (_) {
+        KpmsNotificationLog.realtimeReceived(table: 'pharmacy_notifications');
+        ref.read(pharmacyCloudNotificationSignalProvider.notifier).state++;
+      },
+    );
+
+    ch.onPostgresChanges(
+      event: PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'pharmacy_staff_activity',
+      filter: PostgresChangeFilter(
+        type: PostgresChangeFilterType.eq,
+        column: 'tenant_id',
+        value: tenantId,
+      ),
+      callback: (_) {
+        KpmsRealtimeLog.eventReceived(
+          table: 'pharmacy_staff_activity',
+          tenantId: tenantId,
+          op: 'INSERT',
+        );
+      },
+    );
+
     ch.onPostgresChanges(
       event: PostgresChangeEvent.update,
       schema: 'public',
@@ -138,6 +148,7 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
         ref.invalidate(kpmsPermissionContextProvider);
       },
     );
+
     ch.onPostgresChanges(
       event: PostgresChangeEvent.all,
       schema: 'public',
@@ -152,6 +163,7 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
         ref.invalidate(pharmacySubscriptionBannerProvider);
       },
     );
+
     ch.onPostgresChanges(
       event: PostgresChangeEvent.all,
       schema: 'public',
@@ -166,7 +178,8 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
         ref.invalidate(pharmacySubscriptionBannerProvider);
       },
     );
-    KpmsRealtimeLog.subscribed(tenantId: tenantId, tableCount: 13);
+
+    KpmsRealtimeLog.subscribed(tenantId: tenantId, tableCount: workspaceTables.length + 5);
     ch.subscribe();
     _channel = ch;
     _subscribedTenantId = tenantId;

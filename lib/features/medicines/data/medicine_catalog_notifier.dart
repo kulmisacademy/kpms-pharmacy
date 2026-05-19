@@ -27,6 +27,36 @@ class MedicineCatalogNotifier extends StateNotifier<List<Medicine>> {
     state = List<Medicine>.from(next);
   }
 
+  void reconcileWorkspace(List<Medicine> remote) => replaceAll(remote);
+
+  /// Upsert catalog row from realtime; returns true when state changed.
+  bool mergeWorkspaceEntity(Medicine incoming) {
+    final idx = state.indexWhere((m) => m.id == incoming.id);
+    if (idx < 0) {
+      _invalidateIdCache();
+      state = [incoming, ...state];
+      return true;
+    }
+    final existing = state[idx];
+    if (existing.quantity == incoming.quantity &&
+        existing.sellingPrice == incoming.sellingPrice &&
+        existing.buyingPrice == incoming.buyingPrice &&
+        existing.name == incoming.name) {
+      return false;
+    }
+    _invalidateIdCache();
+    state = [
+      for (final m in state)
+        if (m.id == incoming.id) incoming else m,
+    ];
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    _invalidateIdCache();
+    state = state.where((m) => m.id != clientId).toList();
+  }
+
   void addMedicine(Medicine m) {
     _invalidateIdCache();
     state = [m, ...state];

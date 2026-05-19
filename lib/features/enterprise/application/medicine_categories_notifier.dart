@@ -15,6 +15,23 @@ class MedicineCategoriesNotifier extends StateNotifier<List<MedicineCategory>> {
       ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
   }
 
+  bool mergeWorkspaceEntity(MedicineCategory incoming) {
+    final idx = state.indexWhere((c) => c.id == incoming.id);
+    if (idx < 0) {
+      state = [...state, incoming]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      return true;
+    }
+    state = [
+      for (final c in state)
+        if (c.id == incoming.id) incoming else c,
+    ]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return true;
+  }
+
+  void removeWorkspaceEntity(String clientId) {
+    state = state.where((c) => c.id != clientId).toList();
+  }
+
   void add(MedicineCategory category) {
     state = [...state, category]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
   }

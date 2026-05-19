@@ -4,6 +4,7 @@ import '../../../core/analytics/kpms_analytics_log.dart';
 import '../../../core/performance/kpms_performance_log.dart';
 import '../../../core/tenant/pharmacy_workspace_isolation.dart';
 import '../../sales/application/sales_ledger_notifier.dart';
+import '../../sales/domain/completed_sale_invoice.dart';
 
 /// Sales analytics — session totals; must stay aligned with [salesLedgerProvider] per tenant.
 final salesAnalyticsProvider =
@@ -82,6 +83,49 @@ class SalesAnalyticsNotifier extends StateNotifier<SalesAnalyticsState> {
   /// Wipe analytics memory (logout / tenant switch before new hydration).
   void reset() {
     state = const SalesAnalyticsState();
+  }
+
+  /// Apply incremental dashboard delta after a remote sale patch (avoids full rebuild).
+  void applyRealtimeSale({
+    required SalesLedgerState ledger,
+    required CompletedSaleInvoice invoice,
+    required String tenantId,
+    required bool isNew,
+  }) {
+    final now = DateTime.now();
+    final isToday = _dateOnly(invoice.issuedAt) == _dateOnly(now);
+
+    if (!isNew || !isToday) {
+      rebuildFromLedger(ledger, tenantId: tenantId);
+      return;
+    }
+
+    var topName = '';
+    var topQty = 0;
+    for (final line in invoice.lines) {
+      if (line.quantitySold > topQty) {
+        topQty = line.quantitySold;
+        topName = line.name;
+      }
+    }
+    recordCheckout(
+      revenue: invoice.total,
+      profit: invoice.profitAtSale,
+      topSkuName: topName.isEmpty ? null : topName,
+      topSkuQty: topQty,
+      tenantId: tenantId,
+    );
+  }
+
+  void applyRealtimeReturn({
+    required SalesReturnRecord record,
+    required String tenantId,
+  }) {
+    recordReturn(
+      refundRevenue: record.refundTotal,
+      profitReduction: record.profitReduction,
+      tenantId: tenantId,
+    );
   }
 
   /// Recompute all KPIs from the canonical sales ledger for the current tenant.
