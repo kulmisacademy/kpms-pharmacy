@@ -69,6 +69,8 @@ import '../features/super_admin/presentation/super_admin_plans_screen.dart';
 import '../features/super_admin/presentation/super_admin_login_screen.dart';
 import '../features/super_admin/presentation/super_admin_monitoring_screen.dart';
 import '../features/super_admin/presentation/super_admin_support_screen.dart';
+import '../features/super_admin/presentation/super_admin_approvals_screen.dart';
+import '../features/super_admin/presentation/super_admin_sessions_screen.dart';
 import '../features/super_admin/presentation/super_admin_module_stub_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/kpms_nav_l10n.dart';
@@ -563,14 +565,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.superAdminApprovals,
         name: 'superAdminApprovals',
-        pageBuilder: (context, state) => _superAdminStubPage(
-          state,
-          navId: KpmsNavId.superApprovals,
-          icon: Icons.verified_user_rounded,
-          body:
-              'Queue new pharmacy registrations, KYC checks, and plan assignment before tenants go live. '
-              'Approve/reject actions must be idempotent server functions with audit rows.',
-        ),
+        pageBuilder: (context, state) => kpmsSlideFadePage(state, const SuperAdminApprovalsScreen()),
       ),
       GoRoute(
         path: AppRoutes.superAdminAudit,
@@ -580,14 +575,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.superAdminSessions,
         name: 'superAdminSessions',
-        pageBuilder: (context, state) => _superAdminStubPage(
-          state,
-          navId: KpmsNavId.superSessions,
-          icon: Icons.devices_other_rounded,
-          body:
-              'Surface active Supabase sessions and device metadata; allow remote revoke for compromised accounts. '
-              'Never expose pharmacy cashier sessions to this view without strict scoping.',
-        ),
+        pageBuilder: (context, state) => kpmsSlideFadePage(state, const SuperAdminSessionsScreen()),
       ),
       GoRoute(
         path: AppRoutes.superAdminMonitoring,

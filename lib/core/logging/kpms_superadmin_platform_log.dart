@@ -7,6 +7,8 @@ abstract final class KpmsSuperadminLog {
 
   static void pharmacySuspended({required String tenantId, String? detail}) =>
       _e('pharmacy_suspended tenant=$tenantId${detail == null ? '' : ' $detail'}');
+  static void pharmacyActivated({required String tenantId, String? detail}) =>
+      _e('pharmacy_activated tenant=$tenantId${detail == null ? '' : ' $detail'}');
   static void subscriptionUpdated({required String tenantId, String? detail}) =>
       _e('subscription_updated tenant=$tenantId${detail == null ? '' : ' $detail'}');
   static void featureFlagChanged({required String tenantId, required String key}) =>

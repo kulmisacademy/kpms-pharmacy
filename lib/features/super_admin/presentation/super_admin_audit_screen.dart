@@ -17,6 +17,7 @@ class SuperAdminAuditScreen extends ConsumerStatefulWidget {
 class _SuperAdminAuditScreenState extends ConsumerState<SuperAdminAuditScreen> {
   final _action = TextEditingController();
   final _query = TextEditingController();
+  int _days = 30;
 
   @override
   void dispose() {
@@ -26,7 +27,7 @@ class _SuperAdminAuditScreenState extends ConsumerState<SuperAdminAuditScreen> {
   }
 
   void _apply() {
-    ref.read(superAdminAuditFilterProvider.notifier).state = (_action.text.trim(), _query.text.trim());
+    ref.read(superAdminAuditFilterProvider.notifier).state = (_action.text.trim(), _query.text.trim(), _days);
   }
 
   @override
@@ -66,6 +67,18 @@ class _SuperAdminAuditScreenState extends ConsumerState<SuperAdminAuditScreen> {
                   ),
                   onSubmitted: (_) => _apply(),
                 );
+                final days = DropdownButtonFormField<int>(
+                  key: ValueKey(_days),
+                  initialValue: _days,
+                  decoration: const InputDecoration(labelText: 'Date range', border: OutlineInputBorder()),
+                  items: const [
+                    DropdownMenuItem(value: 7, child: Text('Last 7 days')),
+                    DropdownMenuItem(value: 30, child: Text('Last 30 days')),
+                    DropdownMenuItem(value: 90, child: Text('Last 90 days')),
+                    DropdownMenuItem(value: 0, child: Text('All loaded')),
+                  ],
+                  onChanged: (v) => setState(() => _days = v ?? 30),
+                );
                 if (narrow) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,6 +86,8 @@ class _SuperAdminAuditScreenState extends ConsumerState<SuperAdminAuditScreen> {
                       a,
                       const SizedBox(height: 8),
                       q,
+                      const SizedBox(height: 8),
+                      days,
                       const SizedBox(height: 8),
                       FilledButton.tonalIcon(
                         onPressed: _apply,
@@ -87,6 +102,8 @@ class _SuperAdminAuditScreenState extends ConsumerState<SuperAdminAuditScreen> {
                     Expanded(child: a),
                     const SizedBox(width: 10),
                     Expanded(child: q),
+                    const SizedBox(width: 10),
+                    SizedBox(width: 160, child: days),
                     const SizedBox(width: 10),
                     FilledButton.tonalIcon(
                       onPressed: _apply,

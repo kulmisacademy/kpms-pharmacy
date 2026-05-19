@@ -149,8 +149,11 @@ class _KpmsPlatformAdminShellState extends ConsumerState<KpmsPlatformAdminShell>
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: widget.contentMaxWidth),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: KpmsBreakpoints.pagePaddingHorizontal(width),
+                        padding: EdgeInsets.fromLTRB(
+                          KpmsBreakpoints.pagePaddingHorizontal(width),
+                          8,
+                          KpmsBreakpoints.pagePaddingHorizontal(width),
+                          16,
                         ),
                         child: widget.body,
                       ),
@@ -182,7 +185,7 @@ class _PlatformPageHeading extends StatelessWidget {
     final theme = Theme.of(context);
     if (title == null && actions.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 4, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

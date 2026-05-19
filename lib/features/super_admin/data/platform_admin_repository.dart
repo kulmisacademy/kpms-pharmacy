@@ -90,6 +90,7 @@ class PlatformAdminRepository {
 
   Future<void> reactivatePharmacy(String tenantId) async {
     await _c!.rpc('super_admin_reactivate_pharmacy', params: {'p_tenant_id': tenantId});
+    KpmsSuperadminLog.pharmacyActivated(tenantId: tenantId);
   }
 
   Future<void> archivePharmacy(String tenantId) async {
