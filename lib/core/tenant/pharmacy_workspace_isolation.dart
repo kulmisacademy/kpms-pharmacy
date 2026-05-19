@@ -199,30 +199,32 @@ void ensureWorkspaceTenantBoundary(
 
 /// Validates save/push targets the active tenant (blocks cross-tenant writes).
 
-bool assertActiveTenantForPersistence(String tenantId, {String? userId}) {
-
+bool assertActiveTenantForPersistence(
+  String tenantId, {
+  String? userId,
+  String? loadedWorkspaceTenantId,
+}) {
   final tid = tenantId.trim();
 
   if (tid.isEmpty) {
-
     KpmsTenantLog.crossTenantProtection('blocked save: empty tenantId');
-
     return false;
-
   }
 
   final cached = userId != null ? ProfileTenantGate.cachedTenantId(userId) : null;
 
   if (cached != null && cached != tid) {
-
     KpmsTenantLog.crossTenantProtection('blocked save: tenantId $tid != cached $cached');
-
     return false;
+  }
 
+  final loaded = loadedWorkspaceTenantId?.trim();
+  if (loaded != null && loaded.isNotEmpty && loaded != tid) {
+    KpmsTenantLog.crossTenantProtection('blocked save: tenantId $tid != loaded workspace $loaded');
+    return false;
   }
 
   return true;
-
 }
 
 

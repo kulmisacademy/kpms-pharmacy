@@ -11,30 +11,57 @@ class PlatformAdminRepository {
 
   SupabaseClient? get _c => SupabaseBootstrap.clientOrNull;
 
-  Future<List<Map<String, dynamic>>> listPharmacies({
+  Future<({List<Map<String, dynamic>> rows, int total, int limit, int offset})> listPharmaciesPage({
     String search = '',
     String status = 'all',
+    int limit = 50,
+    int offset = 0,
   }) async {
     final raw = await _c!.rpc(
       'super_admin_list_pharmacies',
       params: {
         'p_search': search.trim().isEmpty ? null : search.trim(),
         'p_status': status.trim().isEmpty ? 'all' : status.trim(),
+        'p_limit': limit,
+        'p_offset': offset,
       },
     );
-    KpmsPlatformLog.directoryLoaded(
-      rows: raw is List ? raw.length : (raw is String ? jsonDecode(raw) as List : const []).length,
+    Map<String, dynamic> map;
+    if (raw is Map<String, dynamic>) {
+      map = raw;
+    } else if (raw is Map) {
+      map = Map<String, dynamic>.from(raw);
+    } else if (raw is String) {
+      map = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+    } else if (raw is List) {
+      final rows = raw.map((e) => Map<String, dynamic>.from(e as Map)).toList(growable: false);
+      KpmsPlatformLog.directoryLoaded(rows: rows.length, detail: 'legacy_array');
+      return (rows: rows, total: rows.length, limit: rows.length, offset: 0);
+    } else {
+      return (rows: const [], total: 0, limit: limit, offset: offset);
+    }
+
+    final rowsRaw = map['rows'];
+    final rows = rowsRaw is List
+        ? rowsRaw.map((e) => Map<String, dynamic>.from(e as Map)).toList(growable: false)
+        : <Map<String, dynamic>>[];
+    final total = (map['total'] as num?)?.toInt() ?? rows.length;
+    KpmsPlatformLog.directoryLoaded(rows: rows.length, detail: 'total=$total offset=$offset');
+    return (
+      rows: rows,
+      total: total,
+      limit: (map['limit'] as num?)?.toInt() ?? limit,
+      offset: (map['offset'] as num?)?.toInt() ?? offset,
     );
-    if (raw is List) {
-      return raw.map((e) => Map<String, dynamic>.from(e as Map)).toList(growable: false);
-    }
-    if (raw is String) {
-      final decoded = jsonDecode(raw);
-      if (decoded is List) {
-        return decoded.map((e) => Map<String, dynamic>.from(e as Map)).toList(growable: false);
-      }
-    }
-    return const [];
+  }
+
+  /// Back-compat: first page only (max 200 rows server-side).
+  Future<List<Map<String, dynamic>>> listPharmacies({
+    String search = '',
+    String status = 'all',
+  }) async {
+    final page = await listPharmaciesPage(search: search, status: status, limit: 200, offset: 0);
+    return page.rows;
   }
 
   Future<Map<String, dynamic>> dashboardStats() async {

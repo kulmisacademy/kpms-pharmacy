@@ -93,4 +93,13 @@ abstract final class KpmsSyncLog {
   static void medicineUpdated(String medicineClientId) => _emit('medicine_updated', medicineClientId);
 
   static void medicineDeleted(String medicineClientId) => _emit('medicine_deleted', medicineClientId);
+
+  static void incrementalPullStarted({required String tenantId, required String since}) =>
+      _emit('incremental_pull_started', 'tenant=$tenantId since=$since');
+
+  static void incrementalPullCompleted({required String tenantId, required int rowDelta}) =>
+      _emit('incremental_pull_completed', 'tenant=$tenantId rows=$rowDelta');
+
+  static void syncLatency({required String label, required int ms}) =>
+      _emit('sync_latency', '$label ${ms}ms');
 }

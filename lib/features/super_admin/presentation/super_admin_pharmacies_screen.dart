@@ -34,12 +34,14 @@ class _SuperAdminPharmaciesScreenState extends ConsumerState<SuperAdminPharmacie
   }
 
   void _applyFilters() {
+    ref.read(superAdminPharmacyPageProvider.notifier).state = 0;
     ref.read(superAdminPharmacyDirectoryQueryProvider.notifier).state = (_search.text.trim(), _status);
   }
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(superAdminPharmaciesProvider);
+    final async = ref.watch(superAdminPharmaciesPageProvider);
+    final pageIndex = ref.watch(superAdminPharmacyPageProvider);
     final width = MediaQuery.sizeOf(context).width;
     final useTable = width >= 1000;
 
@@ -50,7 +52,10 @@ class _SuperAdminPharmaciesScreenState extends ConsumerState<SuperAdminPharmacie
       actions: [
         IconButton(
           tooltip: 'Refresh',
-          onPressed: () => ref.invalidate(superAdminPharmaciesProvider),
+          onPressed: () {
+            ref.invalidate(superAdminPharmaciesPageProvider);
+            ref.invalidate(superAdminPharmaciesProvider);
+          },
           icon: const Icon(Icons.refresh_rounded),
         ),
       ],
@@ -75,7 +80,8 @@ class _SuperAdminPharmaciesScreenState extends ConsumerState<SuperAdminPharmacie
                 title: 'Could not load directory',
                 message: '$e',
               ),
-              data: (rows) {
+              data: (page) {
+                final rows = page.rows;
                 if (rows.isEmpty) {
                   return KpmsEmptyState(
                     icon: Icons.storefront_outlined,
@@ -83,14 +89,38 @@ class _SuperAdminPharmaciesScreenState extends ConsumerState<SuperAdminPharmacie
                     message: 'Adjust filters or wait for new pharmacy registrations.',
                   );
                 }
+                final totalPages = (page.total / superAdminPharmacyPageSize).ceil().clamp(1, 1 << 20);
+                final pager = _DirectoryPager(
+                  pageIndex: pageIndex,
+                  total: page.total,
+                  totalPages: totalPages,
+                  onPrev: pageIndex > 0
+                      ? () => ref.read(superAdminPharmacyPageProvider.notifier).state = pageIndex - 1
+                      : null,
+                  onNext: pageIndex + 1 < totalPages
+                      ? () => ref.read(superAdminPharmacyPageProvider.notifier).state = pageIndex + 1
+                      : null,
+                );
                 if (useTable) {
-                  return _PharmacyDataTable(rows: rows);
+                  return Column(
+                    children: [
+                      pager,
+                      Expanded(child: _PharmacyDataTable(rows: rows)),
+                    ],
+                  );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.only(bottom: PlatformAdminSpacing.xl),
-                  itemCount: rows.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: PlatformAdminSpacing.sm),
-                  itemBuilder: (context, i) => _PharmacyCard(row: rows[i]),
+                return Column(
+                  children: [
+                    pager,
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.only(bottom: PlatformAdminSpacing.md),
+                        itemCount: rows.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: PlatformAdminSpacing.sm),
+                        itemBuilder: (context, i) => _PharmacyCard(row: rows[i]),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -323,6 +353,40 @@ bool _isRecent(dynamic v) {
   final dt = DateTime.tryParse(v.toString());
   if (dt == null) return false;
   return DateTime.now().difference(dt.toUtc()).inHours < 48;
+}
+
+class _DirectoryPager extends StatelessWidget {
+  const _DirectoryPager({
+    required this.pageIndex,
+    required this.total,
+    required this.totalPages,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  final int pageIndex;
+  final int total;
+  final int totalPages;
+  final VoidCallback? onPrev;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: PlatformAdminSpacing.sm),
+      child: Row(
+        children: [
+          Text(
+            '$total pharmacies · page ${pageIndex + 1} / $totalPages',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const Spacer(),
+          IconButton(onPressed: onPrev, icon: const Icon(Icons.chevron_left_rounded)),
+          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right_rounded)),
+        ],
+      ),
+    );
+  }
 }
 
 String _shortDate(dynamic v) {

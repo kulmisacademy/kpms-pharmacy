@@ -355,9 +355,9 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     final tid = _activeTenantId ?? ref.read(kpmsActiveTenantIdProvider).valueOrNull;
     final uid = _activeUserId ?? ref.read(supabaseAuthUserIdProvider).valueOrNull;
     if (tid == null || tid.isEmpty) return;
-    if (!assertActiveTenantForPersistence(tid, userId: uid)) return;
-
     final loaded = ref.read(kpmsLoadedWorkspaceTenantProvider);
+    if (!assertActiveTenantForPersistence(tid, userId: uid, loadedWorkspaceTenantId: loaded)) return;
+
     if (loaded != null && loaded != tid) {
       KpmsTenantLog.crossTenantProtection('blocked local save: loaded=$loaded active=$tid');
       return;
@@ -393,9 +393,9 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     final tid = _activeTenantId ?? ref.read(kpmsActiveTenantIdProvider).valueOrNull;
     final uid = _activeUserId ?? ref.read(supabaseAuthUserIdProvider).valueOrNull;
     if (tid == null || tid.isEmpty) return;
-    if (!assertActiveTenantForPersistence(tid, userId: uid)) return;
-
     final loaded = ref.read(kpmsLoadedWorkspaceTenantProvider);
+    if (!assertActiveTenantForPersistence(tid, userId: uid, loadedWorkspaceTenantId: loaded)) return;
+
     if (loaded != null && loaded != tid) return;
 
     if (_connectivityOffline) {
@@ -437,9 +437,9 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     final tid = _activeTenantId ?? ref.read(kpmsActiveTenantIdProvider).valueOrNull;
     final uid = _activeUserId ?? ref.read(supabaseAuthUserIdProvider).valueOrNull;
     if (tid == null || tid.isEmpty) return;
-    if (!assertActiveTenantForPersistence(tid, userId: uid)) return;
-
     final loaded = ref.read(kpmsLoadedWorkspaceTenantProvider);
+    if (!assertActiveTenantForPersistence(tid, userId: uid, loadedWorkspaceTenantId: loaded)) return;
+
     if (loaded != null && loaded != tid) {
       KpmsTenantLog.crossTenantProtection('blocked cloud push: loaded=$loaded active=$tid');
       return;

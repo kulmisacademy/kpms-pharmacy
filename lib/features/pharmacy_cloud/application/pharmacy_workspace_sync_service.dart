@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/constants/app_prefs_keys.dart';
+import '../../../core/persistence/kpms_persistence_log.dart';
 import '../../../core/persistence/kpms_pharmacy_workspace_store.dart';
 import '../../../core/sync/kpms_sync_log.dart';
 import '../../debts/domain/debt_customer.dart';
@@ -27,6 +29,21 @@ class PharmacyWorkspaceSyncService {
   final PharmacyCloudRepository _cloud;
 
   static String _migratedKey(String tenantId) => 'kpms_cloud_workspace_migrated_v1_$tenantId';
+
+  static String _lastPullKey(String tenantId) => '${AppPrefsKeys.workspaceLastPullAt}_$tenantId';
+
+  static Future<DateTime?> lastPullAt(String tenantId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_lastPullKey(tenantId));
+    return raw == null ? null : DateTime.tryParse(raw);
+  }
+
+  static Future<void> _recordLastPull(String tenantId) async {
+    final now = DateTime.now().toUtc();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastPullKey(tenantId), now.toIso8601String());
+    KpmsPersistenceLog.lastPullRecorded(tenantId: tenantId, iso: now.toIso8601String());
+  }
 
   static Future<void> markMigrated(String tenantId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,7 +117,11 @@ class PharmacyWorkspaceSyncService {
     final localHas = _bundleHasBusinessData(localBundle);
 
     try {
-      final cloudBundle = await _cloud.pullWorkspace(tenantId);
+      final lastPull = await lastPullAt(tenantId);
+      final since = lastPull != null && DateTime.now().difference(lastPull) < const Duration(hours: 12)
+          ? lastPull
+          : null;
+      final cloudBundle = await _cloud.pullWorkspace(tenantId, changesSince: since);
       if (cloudBundle == null) {
         KpmsSyncLog.cloudPullSkipped(tenantId: tenantId, reason: 'no_supabase_client');
         return localHas ? localBundle : null;
@@ -118,9 +139,21 @@ class PharmacyWorkspaceSyncService {
       );
 
       if (cloudHasBusiness) {
-        final merged = mergeCloudWithLocal(cloud: cloudBundle, local: localBundle);
+        final merged = since != null
+            ? mergeCloudWithLocal(
+                cloud: (
+                  medicines: mergeMedicines(cloudBundle.medicines, localBundle.medicines),
+                  sales: cloudBundle.sales,
+                  purchases: cloudBundle.purchases,
+                  debtCustomers: cloudBundle.debtCustomers,
+                  suppliers: cloudBundle.suppliers,
+                ),
+                local: localBundle,
+              )
+            : mergeCloudWithLocal(cloud: cloudBundle, local: localBundle);
         await markMigrated(tenantId);
         await _writeLocalCache(tenantId, merged);
+        await _recordLastPull(tenantId);
         KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: true);
 
         if (_hasLocalOnlyMedicines(cloudBundle.medicines, localMedicines)) {
@@ -142,6 +175,7 @@ class PharmacyWorkspaceSyncService {
       if (cloudHas) {
         await markMigrated(tenantId);
         await _writeLocalCache(tenantId, cloudBundle);
+        await _recordLastPull(tenantId);
         KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: false);
         return cloudBundle;
       }

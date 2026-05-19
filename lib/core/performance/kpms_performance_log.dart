@@ -29,4 +29,10 @@ abstract final class KpmsPerformanceLog {
 
   static void pullCompleted({required String label, required int ms, required int rowEstimate}) =>
       _emit('pull_completed', '$label ${ms}ms rows~$rowEstimate');
+
+  static void queryTime({required String label, required int ms}) =>
+      _emit('query_time', '$label ${ms}ms');
+
+  static void rebuildCount({required String widget, required int count}) =>
+      _emit('rebuild_count', '$widget count=$count');
 }

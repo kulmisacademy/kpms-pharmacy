@@ -51,9 +51,16 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
     _subscribedTenantId = null;
     _subscribedUserId = null;
     if (ch != null) {
+      KpmsRealtimeLog.unsubscribed(tenantId: _subscribedTenantId ?? '');
       SupabaseBootstrap.clientOrNull?.removeChannel(ch);
     }
   }
+
+  static const _enterpriseOnlyTables = {
+    'pharmacy_expenses',
+    'pharmacy_medicine_categories',
+    'pharmacy_product_barcodes',
+  };
 
   void _scheduleResync(String table, String tenantId) {
     KpmsSyncLog.realtimeEvent(table);
@@ -63,11 +70,14 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
       if (!mounted) return;
       KpmsPerformanceLog.realtimeBatched(channel: 'kpms_workspace', debounceMs: 900);
       KpmsRealtimeLog.workspaceRefreshScheduled(tenantId: tenantId, triggerTable: table);
+      if (_enterpriseOnlyTables.contains(table)) {
+        ref.read(pharmacyEnterpriseSyncGenerationProvider.notifier).state++;
+        ref.invalidate(pharmacyEnterpriseBootstrapProvider);
+        return;
+      }
       ref.read(pharmacyCloudSyncGenerationProvider.notifier).state++;
       ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
       ref.invalidate(pharmacyWorkspaceBootstrapProvider);
-      ref.invalidate(pharmacyEnterpriseBootstrapProvider);
-      ref.read(pharmacyEnterpriseSyncGenerationProvider.notifier).state++;
     });
   }
 

@@ -17,4 +17,8 @@ abstract final class KpmsRealtimeLog {
 
   static void workspaceRefreshScheduled({required String tenantId, required String triggerTable}) =>
       _emit('workspace_refresh_scheduled', 'tenant=$tenantId table=$triggerTable');
+
+  static void unsubscribed({required String tenantId}) => _emit('unsubscribed', 'tenant=$tenantId');
+
+  static void activeListeners({required int count}) => _emit('active_listeners', 'count=$count');
 }

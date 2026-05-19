@@ -27,4 +27,7 @@ abstract final class AppPrefsKeys {
 
   /// Anonymous install fingerprint for [pharmacy_staff_device_sessions.device_id].
   static const String deviceFingerprint = 'kpms_device_fingerprint_v1';
+
+  /// ISO-8601 last successful cloud pull per tenant (`${workspaceLastPullAt}_$tenantId`).
+  static const String workspaceLastPullAt = 'kpms_workspace_last_pull_v1';
 }

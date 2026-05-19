@@ -9,10 +9,28 @@ final platformAdminRepositoryProvider = Provider<PlatformAdminRepository>(
 /// `(search, status)` — `status` one of all|active|suspended|archived.
 final superAdminPharmacyDirectoryQueryProvider = StateProvider<(String, String)>((ref) => ('', 'all'));
 
-final superAdminPharmaciesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+/// Zero-based page index for pharmacy directory.
+final superAdminPharmacyPageProvider = StateProvider<int>((ref) => 0);
+
+const superAdminPharmacyPageSize = 50;
+
+final superAdminPharmaciesPageProvider =
+    FutureProvider.autoDispose<({List<Map<String, dynamic>> rows, int total, int limit, int offset})>((ref) async {
   final q = ref.watch(superAdminPharmacyDirectoryQueryProvider);
+  final page = ref.watch(superAdminPharmacyPageProvider);
   final repo = ref.watch(platformAdminRepositoryProvider);
-  return repo.listPharmacies(search: q.$1, status: q.$2);
+  return repo.listPharmaciesPage(
+    search: q.$1,
+    status: q.$2,
+    limit: superAdminPharmacyPageSize,
+    offset: page * superAdminPharmacyPageSize,
+  );
+});
+
+/// Legacy alias — first page for dashboard widgets.
+final superAdminPharmaciesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+  final page = await ref.watch(superAdminPharmaciesPageProvider.future);
+  return page.rows;
 });
 
 final superAdminDashboardStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {

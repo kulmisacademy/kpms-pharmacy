@@ -36,17 +36,29 @@ class PharmacyCloudRepository {
     PurchaseLedgerState purchases,
     List<DebtCustomer> debtCustomers,
     List<Supplier> suppliers,
-  })?> pullWorkspace(String tenantId) async {
+  })?> pullWorkspace(String tenantId, {DateTime? changesSince}) async {
     final c = _client;
     if (c == null) return null;
 
     KpmsSyncLog.pullStarted(tenantId);
+    if (changesSince != null) {
+      KpmsSyncLog.incrementalPullStarted(tenantId: tenantId, since: changesSince.toUtc().toIso8601String());
+    }
 
     final sw = Stopwatch()..start();
-    final medRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_inventory',
-      tenantId: tenantId,
-    );
+    final medRows = changesSince != null
+        ? await KpmsSupabasePagedFetch.fetchForTenantSince(
+            table: 'pharmacy_inventory',
+            tenantId: tenantId,
+            since: changesSince,
+          )
+        : await KpmsSupabasePagedFetch.fetchAllForTenant(
+            table: 'pharmacy_inventory',
+            tenantId: tenantId,
+          );
+    if (changesSince != null) {
+      KpmsSyncLog.incrementalPullCompleted(tenantId: tenantId, rowDelta: medRows.length);
+    }
     final custRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
       table: 'pharmacy_customers',
       tenantId: tenantId,
