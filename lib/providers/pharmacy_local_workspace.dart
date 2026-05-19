@@ -41,6 +41,72 @@ import '../features/suppliers/domain/supplier.dart';
 /// Current bundle schema for local workspace JSON. Bump only with a migration path.
 const int kpmsLocalBundleSchemaCurrent = 1;
 
+/// Immediate local save + optional cloud push (e.g. before sign-out).
+Future<void> flushPharmacyWorkspacePersistence(
+  WidgetRef ref, {
+  String reason = 'manual_flush',
+  bool pushCloud = true,
+}) async {
+  final tid = ref.read(kpmsActiveTenantIdProvider).valueOrNull;
+  final uid = ref.read(supabaseAuthUserIdProvider).valueOrNull;
+  if (tid == null || tid.isEmpty) return;
+
+  KpmsSyncLog.workspaceFlush(tenantId: tid, reason: reason);
+  final loaded = ref.read(kpmsLoadedWorkspaceTenantProvider);
+  if (!assertActiveTenantForPersistence(tid, userId: uid, loadedWorkspaceTenantId: loaded)) return;
+  if (loaded != null && loaded != tid) return;
+
+  final sales = ref.read(salesLedgerProvider);
+  final purchases = ref.read(purchaseLedgerProvider);
+  if (sales.invoices.isNotEmpty) {
+    KpmsSyncLog.salePushAttempt(
+      tenantId: tid,
+      invoiceCount: sales.invoices.length,
+      returnCount: sales.returns.length,
+    );
+  }
+
+  await KpmsPharmacyWorkspaceStore.save(
+    tenantId: tid,
+    userId: uid,
+    medicines: ref.read(medicineCatalogProvider),
+    sales: sales,
+    purchases: purchases,
+    debtCustomers: ref.read(debtCustomersProvider),
+    suppliers: ref.read(suppliersProvider),
+  );
+
+  if (!pushCloud) return;
+  final bootstrapReady = ref.read(pharmacyWorkspaceBootstrapReadyProvider);
+  if (!bootstrapReady) {
+    KpmsSyncLog.bootstrapGatedPush(allowed: false, reason: 'flush_before_bootstrap');
+    return;
+  }
+
+  try {
+    final pendingDeletes = List<String>.from(ref.read(pendingMedicineDeletionsProvider));
+    await ref.read(pharmacyWorkspaceSyncServiceProvider).pushToCloud(
+          tenantId: tid,
+          medicines: ref.read(medicineCatalogProvider),
+          sales: sales,
+          purchases: purchases,
+          debtCustomers: ref.read(debtCustomersProvider),
+          suppliers: ref.read(suppliersProvider),
+          deletedMedicineClientIds: pendingDeletes,
+        );
+    if (pendingDeletes.isNotEmpty) {
+      await ref.read(pendingMedicineDeletionsProvider.notifier).clearIds(pendingDeletes);
+    }
+  } catch (e) {
+    await KpmsSyncOutboxService.enqueue(
+      tenantId: tid,
+      entityType: KpmsSyncEntityType.workspace,
+      operationType: KpmsSyncOperationType.upsert,
+      payload: {'reason': 'flush_failed', 'error': e.toString()},
+    );
+  }
+}
+
 void _hydrateWorkspace(
   Ref ref, {
   required String tenantId,
@@ -85,6 +151,7 @@ final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
   final localDebts = local?.debtCustomers ?? const [];
   final localSuppliers = local?.suppliers ?? const [];
 
+  var hydrated = false;
   try {
     final sync = ref.read(pharmacyWorkspaceSyncServiceProvider);
     final bundle = await sync.bootstrapWorkspace(
@@ -107,6 +174,7 @@ final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
         debtCustomers: bundle.debtCustomers,
         suppliers: bundle.suppliers,
       );
+      hydrated = true;
       KpmsPersistenceLog.workspaceLoaded(
         tenantId: tenantId,
         hasData: KpmsPharmacyWorkspaceStore.bundleHasBusinessData(
@@ -133,13 +201,32 @@ final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
         debtCustomers: localDebts,
         suppliers: localSuppliers,
       );
+      hydrated = true;
       KpmsPersistenceLog.workspaceRecovered(tenantId: tenantId, reason: 'cloud_unavailable_used_local');
     } else {
       clearOperationalWorkspace(ref, reason: 'empty_tenant_workspace');
       ensureWorkspaceTenantBoundary(ref, userId: uid, tenantId: tenantId);
     }
+  } catch (e, st) {
+    // ignore: avoid_print
+    print('pharmacyWorkspaceBootstrap failed: $e\n$st');
+    if (!hydrated && local != null) {
+      _hydrateWorkspace(
+        ref,
+        tenantId: tenantId,
+        userId: uid,
+        medicines: localMeds,
+        sales: localSales,
+        purchases: localPurchases,
+        debtCustomers: localDebts,
+        suppliers: localSuppliers,
+      );
+      hydrated = true;
+      KpmsPersistenceLog.workspaceRecovered(tenantId: tenantId, reason: 'bootstrap_error_used_local');
+    }
+    rethrow;
   } finally {
-    ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = true;
+    ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = hydrated;
   }
 });
 
@@ -513,7 +600,7 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
     bootstrap.when(
       data: (_) => _bootstrapReady = ref.read(pharmacyWorkspaceBootstrapReadyProvider),
       loading: () => _bootstrapReady = false,
-      error: (e, st) => _bootstrapReady = true,
+      error: (_, _) => _bootstrapReady = ref.read(pharmacyWorkspaceBootstrapReadyProvider),
     );
 
     ref.listen(pharmacyWorkspaceBootstrapReadyProvider, (prev, next) {

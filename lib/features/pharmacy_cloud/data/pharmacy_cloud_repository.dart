@@ -212,11 +212,21 @@ class PharmacyCloudRepository {
     }
 
     if (sales.invoices.isNotEmpty) {
-      await c.from('pharmacy_sales').upsert(
-        [for (final inv in sales.invoices) PharmacyCloudMapper.saleToRow(tenantId, inv)],
-        onConflict: 'tenant_id,client_id',
+      KpmsSyncLog.salePushAttempt(
+        tenantId: tenantId,
+        invoiceCount: sales.invoices.length,
+        returnCount: sales.returns.length,
       );
-      rows += sales.invoices.length;
+      try {
+        await c.from('pharmacy_sales').upsert(
+          [for (final inv in sales.invoices) PharmacyCloudMapper.saleToRow(tenantId, inv)],
+          onConflict: 'tenant_id,client_id',
+        );
+        rows += sales.invoices.length;
+      } catch (e) {
+        KpmsSyncLog.salePushResult(tenantId: tenantId, success: false, error: '$e');
+        rethrow;
+      }
 
       final itemRows = <Map<String, dynamic>>[];
       for (final inv in sales.invoices) {
@@ -267,8 +277,25 @@ class PharmacyCloudRepository {
       rows += purchases.returns.length;
     }
 
+    if (sales.invoices.isNotEmpty) {
+      KpmsSyncLog.salePushResult(tenantId: tenantId, success: true, rows: sales.invoices.length);
+    }
     KpmsSyncLog.uploadCompleted(tenantId: tenantId, rows: rows);
     return rows;
+  }
+
+  /// Row counts for sync integrity diagnostics (tenant-scoped).
+  Future<({int sales, int purchases, int medicines})> countCloudRows(String tenantId) async {
+    final c = _client;
+    if (c == null) return (sales: 0, purchases: 0, medicines: 0);
+    final sales = await c.from('pharmacy_sales').select('id').eq('tenant_id', tenantId).count();
+    final purchases = await c.from('pharmacy_purchases').select('id').eq('tenant_id', tenantId).count();
+    final medicines = await c.from('pharmacy_inventory').select('id').eq('tenant_id', tenantId).count();
+    return (
+      sales: sales.count,
+      purchases: purchases.count,
+      medicines: medicines.count,
+    );
   }
 
   /// Removes catalog rows no longer present in the local workspace snapshot.

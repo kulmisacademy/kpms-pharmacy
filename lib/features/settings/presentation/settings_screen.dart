@@ -22,6 +22,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/app_locale_provider.dart';
 import '../application/pharmacy_settings_providers.dart';
 import '../domain/pharmacy_tenant.dart';
+import 'widgets/sync_integrity_card.dart';
 
 void _kpmsCloseSheetThenReloadPharmacy(BuildContext sheetContext, BuildContext parentContext) {
   FocusManager.instance.primaryFocus?.unfocus();
@@ -505,6 +506,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _SectionTitle(text: l.settingsSectionAbout),
                 _SettingsCard(
                   children: [
+                    const SyncIntegrityCard(),
+                    const Divider(height: 1),
                     ListTile(
                       leading: Icon(Icons.info_outline_rounded, color: theme.colorScheme.primary),
                       title: Text(l.settingsAboutOpen),

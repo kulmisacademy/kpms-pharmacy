@@ -10,7 +10,10 @@ import '../../../core/sync/kpms_sync_log.dart';
 import '../../debts/domain/debt_customer.dart';
 import '../../medicines/domain/medicine.dart';
 import '../../purchases/application/purchase_ledger_notifier.dart';
+import '../../purchases/domain/purchase_invoice.dart';
+import '../../purchases/domain/purchase_return.dart';
 import '../../sales/application/sales_ledger_notifier.dart';
+import '../../sales/domain/completed_sale_invoice.dart';
 import '../../suppliers/domain/supplier.dart';
 import '../data/pharmacy_cloud_repository.dart';
 
@@ -80,21 +83,180 @@ class PharmacyWorkspaceSyncService {
     return merged.values.toList();
   }
 
+  static CompletedSaleInvoice _pickSaleInvoice(CompletedSaleInvoice a, CompletedSaleInvoice b) {
+    if (a.issuedAt.isAfter(b.issuedAt)) return a;
+    if (b.issuedAt.isAfter(a.issuedAt)) return b;
+    return a.paidTowardInvoice >= b.paidTowardInvoice ? a : b;
+  }
+
+  static SalesLedgerState mergeSalesLedgers({
+    required SalesLedgerState cloud,
+    required SalesLedgerState local,
+    required String tenantId,
+  }) {
+    final invoices = <String, CompletedSaleInvoice>{};
+    var localOnly = 0;
+    var cloudOnly = 0;
+    var updated = 0;
+
+    for (final inv in cloud.invoices) {
+      invoices[inv.invoiceNumber] = inv;
+    }
+    final localInvoiceIds = local.invoices.map((i) => i.invoiceNumber).toSet();
+    for (final inv in local.invoices) {
+      final existing = invoices[inv.invoiceNumber];
+      if (existing == null) {
+        invoices[inv.invoiceNumber] = inv;
+        localOnly++;
+      } else {
+        final picked = _pickSaleInvoice(existing, inv);
+        if (!identical(picked, existing)) updated++;
+        invoices[inv.invoiceNumber] = picked;
+      }
+    }
+    cloudOnly = cloud.invoices.where((i) => !localInvoiceIds.contains(i.invoiceNumber)).length;
+
+    final returns = <String, SalesReturnRecord>{};
+    var localReturns = 0;
+    for (final r in cloud.returns) {
+      returns[r.returnInvoiceNumber] = r;
+    }
+    for (final r in local.returns) {
+      if (!returns.containsKey(r.returnInvoiceNumber)) {
+        returns[r.returnInvoiceNumber] = r;
+        localReturns++;
+      }
+    }
+
+    final merged = SalesLedgerState(
+      invoices: invoices.values.toList()
+        ..sort((a, b) => b.issuedAt.compareTo(a.issuedAt)),
+      returns: returns.values.toList(),
+    );
+
+    KpmsSyncLog.ledgerMergeDecision(
+      tenantId: tenantId,
+      entity: 'sales',
+      cloudCount: cloud.invoices.length,
+      localCount: local.invoices.length,
+      mergedCount: merged.invoices.length,
+      localOnly: localOnly,
+      cloudOnly: cloudOnly,
+      updated: updated,
+    );
+    if (localReturns > 0) {
+      KpmsSyncLog.ledgerMergeDecision(
+        tenantId: tenantId,
+        entity: 'sale_returns',
+        cloudCount: cloud.returns.length,
+        localCount: local.returns.length,
+        mergedCount: merged.returns.length,
+        localOnly: localReturns,
+        cloudOnly: 0,
+        updated: 0,
+      );
+    }
+    return merged;
+  }
+
+  static PurchaseLedgerState mergePurchaseLedgers({
+    required PurchaseLedgerState cloud,
+    required PurchaseLedgerState local,
+    required String tenantId,
+  }) {
+    final invoices = <String, PurchaseInvoice>{};
+    var localOnly = 0;
+    var updated = 0;
+
+    for (final inv in cloud.invoices) {
+      invoices[inv.invoiceNumber] = inv;
+    }
+    for (final inv in local.invoices) {
+      final existing = invoices[inv.invoiceNumber];
+      if (existing == null) {
+        invoices[inv.invoiceNumber] = inv;
+        localOnly++;
+      } else {
+        final picked = inv.issuedAt.isAfter(existing.issuedAt) ? inv : existing;
+        if (!identical(picked, existing)) updated++;
+        invoices[inv.invoiceNumber] = picked;
+      }
+    }
+
+    final returns = <String, PurchaseReturnRecord>{};
+    var localReturns = 0;
+    for (final r in cloud.returns) {
+      returns[r.returnInvoiceNumber] = r;
+    }
+    for (final r in local.returns) {
+      if (!returns.containsKey(r.returnInvoiceNumber)) {
+        returns[r.returnInvoiceNumber] = r;
+        localReturns++;
+      }
+    }
+
+    final merged = PurchaseLedgerState(
+      invoices: invoices.values.toList()
+        ..sort((a, b) => b.issuedAt.compareTo(a.issuedAt)),
+      returns: returns.values.toList(),
+    );
+
+    KpmsSyncLog.ledgerMergeDecision(
+      tenantId: tenantId,
+      entity: 'purchases',
+      cloudCount: cloud.invoices.length,
+      localCount: local.invoices.length,
+      mergedCount: merged.invoices.length,
+      localOnly: localOnly,
+      cloudOnly: 0,
+      updated: updated,
+    );
+    if (localReturns > 0) {
+      KpmsSyncLog.ledgerMergeDecision(
+        tenantId: tenantId,
+        entity: 'purchase_returns',
+        cloudCount: cloud.returns.length,
+        localCount: local.returns.length,
+        mergedCount: merged.returns.length,
+        localOnly: localReturns,
+        cloudOnly: 0,
+        updated: 0,
+      );
+    }
+    return merged;
+  }
+
+  static List<DebtCustomer> mergeDebtCustomers(List<DebtCustomer> cloud, List<DebtCustomer> local) {
+    final merged = <String, DebtCustomer>{for (final c in cloud) c.id: c};
+    for (final c in local) {
+      merged.putIfAbsent(c.id, () => c);
+    }
+    return merged.values.toList();
+  }
+
+  static List<Supplier> mergeSuppliers(List<Supplier> cloud, List<Supplier> local) {
+    final merged = <String, Supplier>{for (final s in cloud) s.id: s};
+    for (final s in local) {
+      merged.putIfAbsent(s.id, () => s);
+    }
+    return merged.values.toList();
+  }
+
   static PharmacyWorkspaceBundle mergeCloudWithLocal({
     required PharmacyWorkspaceBundle cloud,
     required PharmacyWorkspaceBundle local,
+    required String tenantId,
   }) {
-    final cloudHasLedger = cloud.sales.invoices.isNotEmpty ||
-        cloud.sales.returns.isNotEmpty ||
-        cloud.purchases.invoices.isNotEmpty ||
-        cloud.purchases.returns.isNotEmpty;
-
     return (
       medicines: mergeMedicines(cloud.medicines, local.medicines),
-      sales: cloudHasLedger ? cloud.sales : local.sales,
-      purchases: cloudHasLedger ? cloud.purchases : local.purchases,
-      debtCustomers: cloud.debtCustomers.isNotEmpty ? cloud.debtCustomers : local.debtCustomers,
-      suppliers: cloud.suppliers.isNotEmpty ? cloud.suppliers : local.suppliers,
+      sales: mergeSalesLedgers(cloud: cloud.sales, local: local.sales, tenantId: tenantId),
+      purchases: mergePurchaseLedgers(
+        cloud: cloud.purchases,
+        local: local.purchases,
+        tenantId: tenantId,
+      ),
+      debtCustomers: mergeDebtCustomers(cloud.debtCustomers, local.debtCustomers),
+      suppliers: mergeSuppliers(cloud.suppliers, local.suppliers),
     );
   }
 
@@ -117,18 +279,20 @@ class PharmacyWorkspaceSyncService {
     final localHas = _bundleHasBusinessData(localBundle);
 
     try {
-      final lastPull = await lastPullAt(tenantId);
-      final since = lastPull != null && DateTime.now().difference(lastPull) < const Duration(hours: 12)
-          ? lastPull
-          : null;
-      final cloudBundle = await _cloud.pullWorkspace(tenantId, changesSince: since);
+      KpmsSyncLog.bootstrapPullMode(tenantId: tenantId, mode: 'full');
+      KpmsSyncLog.workspaceRestoreSource(tenantId: tenantId, source: 'cloud_first_full_pull');
+      final cloudBundle = await _cloud.pullWorkspace(tenantId);
       if (cloudBundle == null) {
         KpmsSyncLog.cloudPullSkipped(tenantId: tenantId, reason: 'no_supabase_client');
+        if (localHas) {
+          KpmsSyncLog.workspaceRestoreSource(tenantId: tenantId, source: 'local_only_offline');
+        }
         return localHas ? localBundle : null;
       }
 
       final cloudHas = await _cloud.hasCloudData(tenantId);
       final cloudHasBusiness = _bundleHasBusinessData(cloudBundle);
+      final lastPull = await lastPullAt(tenantId);
 
       KpmsSyncLog.cloudPullCompleted(
         tenantId: tenantId,
@@ -138,25 +302,25 @@ class PharmacyWorkspaceSyncService {
         cloudHas: cloudHas,
       );
 
-      if (cloudHasBusiness) {
-        final merged = since != null
-            ? mergeCloudWithLocal(
-                cloud: (
-                  medicines: mergeMedicines(cloudBundle.medicines, localBundle.medicines),
-                  sales: cloudBundle.sales,
-                  purchases: cloudBundle.purchases,
-                  debtCustomers: cloudBundle.debtCustomers,
-                  suppliers: cloudBundle.suppliers,
-                ),
-                local: localBundle,
-              )
-            : mergeCloudWithLocal(cloud: cloudBundle, local: localBundle);
+      final merged = mergeCloudWithLocal(
+        cloud: cloudBundle,
+        local: localBundle,
+        tenantId: tenantId,
+      );
+      final mergedHasBusiness = _bundleHasBusinessData(merged);
+
+      if (cloudHasBusiness || localHas || mergedHasBusiness) {
         await markMigrated(tenantId);
         await _writeLocalCache(tenantId, merged);
         await _recordLastPull(tenantId);
-        KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: true);
+        KpmsSyncLog.workspaceRestoreSource(
+          tenantId: tenantId,
+          source: cloudHasBusiness ? 'cloud_merged_with_local' : 'local_hydrated_to_cloud',
+          pullIso: lastPull?.toUtc().toIso8601String(),
+        );
+        KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: mergedHasBusiness);
 
-        if (_hasLocalOnlyMedicines(cloudBundle.medicines, localMedicines)) {
+        if (_needsPushAfterMerge(cloudBundle, localBundle, merged)) {
           KpmsSyncLog.uploadStarted(tenantId: tenantId);
           await _cloud.pushWorkspace(
             tenantId: tenantId,
@@ -173,11 +337,18 @@ class PharmacyWorkspaceSyncService {
       }
 
       if (cloudHas) {
+        final fallback = localHas
+            ? mergeCloudWithLocal(cloud: cloudBundle, local: localBundle, tenantId: tenantId)
+            : cloudBundle;
         await markMigrated(tenantId);
-        await _writeLocalCache(tenantId, cloudBundle);
+        await _writeLocalCache(tenantId, fallback);
         await _recordLastPull(tenantId);
-        KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: false);
-        return cloudBundle;
+        KpmsSyncLog.workspaceRestoreSource(
+          tenantId: tenantId,
+          source: localHas ? 'cloud_metadata_local_ledger' : 'cloud_metadata_only',
+        );
+        KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: _bundleHasBusinessData(fallback));
+        return fallback;
       }
 
       if (localHas) {
@@ -210,6 +381,26 @@ class PharmacyWorkspaceSyncService {
     return local.any((m) => !cloudIds.contains(m.id));
   }
 
+  static bool _hasLocalOnlySales(SalesLedgerState cloud, SalesLedgerState merged) {
+    final cloudIds = cloud.invoices.map((i) => i.invoiceNumber).toSet();
+    return merged.invoices.any((i) => !cloudIds.contains(i.invoiceNumber));
+  }
+
+  static bool _hasLocalOnlyPurchases(PurchaseLedgerState cloud, PurchaseLedgerState merged) {
+    final cloudIds = cloud.invoices.map((i) => i.invoiceNumber).toSet();
+    return merged.invoices.any((i) => !cloudIds.contains(i.invoiceNumber));
+  }
+
+  static bool _needsPushAfterMerge(
+    PharmacyWorkspaceBundle cloud,
+    PharmacyWorkspaceBundle local,
+    PharmacyWorkspaceBundle merged,
+  ) {
+    return _hasLocalOnlyMedicines(cloud.medicines, merged.medicines) ||
+        _hasLocalOnlySales(cloud.sales, merged.sales) ||
+        _hasLocalOnlyPurchases(cloud.purchases, merged.purchases);
+  }
+
   Future<void> pushToCloud({
     required String tenantId,
     required List<Medicine> medicines,
@@ -221,6 +412,11 @@ class PharmacyWorkspaceSyncService {
   }) async {
     try {
       KpmsSyncLog.uploadStarted(tenantId: tenantId);
+      KpmsSyncLog.salePushAttempt(
+        tenantId: tenantId,
+        invoiceCount: sales.invoices.length,
+        returnCount: sales.returns.length,
+      );
       final rows = await _cloud.pushWorkspace(
         tenantId: tenantId,
         medicines: medicines,
@@ -229,6 +425,7 @@ class PharmacyWorkspaceSyncService {
         debtCustomers: debtCustomers,
         suppliers: suppliers,
       );
+      KpmsSyncLog.salePushResult(tenantId: tenantId, success: true, rows: rows);
       if (deletedMedicineClientIds.isNotEmpty) {
         await _cloud.deleteMedicines(tenantId, deletedMedicineClientIds);
       }
@@ -240,6 +437,7 @@ class PharmacyWorkspaceSyncService {
       );
     } catch (e, st) {
       debugPrint('PharmacyWorkspaceSyncService.push failed: $e\n$st');
+      KpmsSyncLog.salePushResult(tenantId: tenantId, success: false, error: '$e');
       KpmsSyncLog.uploadFailed('$e');
       KpmsSyncLog.syncRetry('push: $e');
       rethrow;

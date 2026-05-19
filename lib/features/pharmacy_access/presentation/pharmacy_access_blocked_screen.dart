@@ -87,6 +87,7 @@ class PharmacyAccessBlockedScreen extends ConsumerWidget {
                       const SizedBox(height: 28),
                       FilledButton(
                         onPressed: () async {
+                          await flushPharmacyWorkspacePersistence(ref, reason: 'access_blocked_sign_out');
                           resetTenantSessionCaches(ref, reason: 'access_blocked_sign_out');
                           ref.invalidate(pharmacyWorkspaceBootstrapProvider);
                           await ref.read(authRepositoryProvider).signOut();

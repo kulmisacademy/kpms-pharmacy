@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_providers.dart';
+import '../../providers/pharmacy_local_workspace.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/kpms_nav_l10n.dart';
 import '../auth/kpms_permission_gate.dart';
@@ -30,6 +31,7 @@ class KpmsAppDrawer extends ConsumerWidget {
 
     Future<void> signOut() async {
       Navigator.of(context).maybePop();
+      await flushPharmacyWorkspacePersistence(ref, reason: 'sign_out');
       KpmsPermissionGate.invalidate();
       await ref.read(authRepositoryProvider).signOut();
       if (context.mounted) context.go(AppRoutes.login);

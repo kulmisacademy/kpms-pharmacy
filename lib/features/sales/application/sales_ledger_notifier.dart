@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audit/pharmacy_audit_hooks.dart';
+import '../../../core/sync/kpms_sync_log.dart';
 import '../../../core/tenant/kpms_active_tenant_provider.dart';
 import '../../analytics/application/sales_analytics_notifier.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
@@ -45,6 +46,14 @@ class SalesLedgerNotifier extends StateNotifier<SalesLedgerState> {
 
   void addInvoice(CompletedSaleInvoice invoice) {
     state = state.copyWith(invoices: [invoice, ...state.invoices]);
+    final tenantId = _ref.read(kpmsActiveTenantIdProvider).valueOrNull;
+    if (tenantId != null && tenantId.isNotEmpty) {
+      KpmsSyncLog.saleInsertLocal(
+        tenantId: tenantId,
+        invoiceNumber: invoice.invoiceNumber,
+        total: invoice.total,
+      );
+    }
   }
 
   CompletedSaleInvoice? invoiceByNumber(String invoiceNumber) {

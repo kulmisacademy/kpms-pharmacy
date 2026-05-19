@@ -102,4 +102,67 @@ abstract final class KpmsSyncLog {
 
   static void syncLatency({required String label, required int ms}) =>
       _emit('sync_latency', '$label ${ms}ms');
+
+  static void workspaceRestoreSource({
+    required String tenantId,
+    required String source,
+    String? pullIso,
+  }) =>
+      _emit(
+        'workspace_restore_source',
+        'tenant=$tenantId source=$source${pullIso != null ? ' lastPull=$pullIso' : ''}',
+      );
+
+  static void ledgerMergeDecision({
+    required String tenantId,
+    required String entity,
+    required int cloudCount,
+    required int localCount,
+    required int mergedCount,
+    required int localOnly,
+    required int cloudOnly,
+    required int updated,
+  }) =>
+      _emit(
+        'ledger_merge',
+        'tenant=$tenantId entity=$entity cloud=$cloudCount local=$localCount merged=$mergedCount localOnly=$localOnly cloudOnly=$cloudOnly updated=$updated',
+      );
+
+  static void saleInsertLocal({
+    required String tenantId,
+    required String invoiceNumber,
+    required double total,
+  }) =>
+      _emit('sale_insert_local', 'tenant=$tenantId invoice=$invoiceNumber total=$total');
+
+  static void salePushAttempt({
+    required String tenantId,
+    required int invoiceCount,
+    required int returnCount,
+  }) =>
+      _emit('sale_push_attempt', 'tenant=$tenantId invoices=$invoiceCount returns=$returnCount');
+
+  static void salePushResult({
+    required String tenantId,
+    required bool success,
+    int rows = 0,
+    String? error,
+  }) =>
+      _emit(
+        'sale_push_result',
+        'tenant=$tenantId success=$success rows=$rows${error != null ? ' error=$error' : ''}',
+      );
+
+  static void bootstrapPullMode({
+    required String tenantId,
+    required String mode,
+    String? sinceIso,
+  }) =>
+      _emit(
+        'bootstrap_pull_mode',
+        'tenant=$tenantId mode=$mode${sinceIso != null ? ' since=$sinceIso' : ''}',
+      );
+
+  static void workspaceFlush({required String tenantId, required String reason}) =>
+      _emit('workspace_flush', 'tenant=$tenantId reason=$reason');
 }
