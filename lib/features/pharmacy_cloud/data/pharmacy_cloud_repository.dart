@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/persistence/kpms_pharmacy_workspace_store.dart';
 import '../../../core/performance/kpms_performance_log.dart';
+import '../../../core/supabase/kpms_supabase_chunked_upsert.dart';
 import '../../../core/supabase/kpms_supabase_paged_fetch.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/sync/kpms_sync_log.dart';
@@ -46,53 +47,53 @@ class PharmacyCloudRepository {
       KpmsSyncLog.incrementalPullStarted(tenantId: tenantId, since: changesSince.toUtc().toIso8601String());
     }
 
-    final sw = Stopwatch()..start();
-    final medRows = changesSince != null
-        ? await KpmsSupabasePagedFetch.fetchForTenantSince(
-            table: 'pharmacy_inventory',
-            tenantId: tenantId,
-            since: changesSince,
-          )
-        : await KpmsSupabasePagedFetch.fetchAllForTenant(
-            table: 'pharmacy_inventory',
-            tenantId: tenantId,
-          );
-    if (changesSince != null) {
-      KpmsSyncLog.incrementalPullCompleted(tenantId: tenantId, rowDelta: medRows.length);
+    Future<List<Map<String, dynamic>>> rows(String table) {
+      if (changesSince != null) {
+        return KpmsSupabasePagedFetch.fetchForTenantSince(
+          table: table,
+          tenantId: tenantId,
+          since: changesSince,
+        );
+      }
+      return KpmsSupabasePagedFetch.fetchAllForTenant(table: table, tenantId: tenantId);
     }
-    final custRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_customers',
-      tenantId: tenantId,
-    );
-    final supRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_suppliers',
-      tenantId: tenantId,
-    );
-    final saleRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_sales',
-      tenantId: tenantId,
-    );
-    final saleItemRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_sale_items',
-      tenantId: tenantId,
-    );
-    final saleReturnRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_sale_returns',
-      tenantId: tenantId,
-    );
-    final purchaseRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_purchases',
-      tenantId: tenantId,
-    );
-    final purchaseItemRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_purchase_items',
-      tenantId: tenantId,
-    );
-    final purchaseReturnRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_purchase_returns',
-      tenantId: tenantId,
-    );
+
+    final sw = Stopwatch()..start();
+    final fetched = await Future.wait([
+      rows('pharmacy_inventory'),
+      rows('pharmacy_customers'),
+      rows('pharmacy_suppliers'),
+      rows('pharmacy_sales'),
+      rows('pharmacy_sale_items'),
+      rows('pharmacy_sale_returns'),
+      rows('pharmacy_purchases'),
+      rows('pharmacy_purchase_items'),
+      rows('pharmacy_purchase_returns'),
+    ]);
     sw.stop();
+
+    final medRows = fetched[0];
+    final custRows = fetched[1];
+    final supRows = fetched[2];
+    final saleRows = fetched[3];
+    final saleItemRows = fetched[4];
+    final saleReturnRows = fetched[5];
+    final purchaseRows = fetched[6];
+    final purchaseItemRows = fetched[7];
+    final purchaseReturnRows = fetched[8];
+
+    if (changesSince != null) {
+      final delta = medRows.length +
+          custRows.length +
+          supRows.length +
+          saleRows.length +
+          saleItemRows.length +
+          saleReturnRows.length +
+          purchaseRows.length +
+          purchaseItemRows.length +
+          purchaseReturnRows.length;
+      KpmsSyncLog.incrementalPullCompleted(tenantId: tenantId, rowDelta: delta);
+    }
 
     final rowEstimate = medRows.length +
         custRows.length +
@@ -104,7 +105,7 @@ class PharmacyCloudRepository {
         purchaseItemRows.length +
         purchaseReturnRows.length;
     KpmsPerformanceLog.pullCompleted(
-      label: 'pharmacy_workspace',
+      label: changesSince != null ? 'pharmacy_workspace@incremental' : 'pharmacy_workspace',
       ms: sw.elapsedMilliseconds,
       rowEstimate: rowEstimate,
     );
@@ -189,27 +190,30 @@ class PharmacyCloudRepository {
     var rows = 0;
 
     if (medicines.isNotEmpty) {
-      await c.from('pharmacy_inventory').upsert(
-        [for (final m in medicines) PharmacyCloudMapper.medicineToRow(tenantId, m)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_inventory',
+        rows: [for (final m in medicines) PharmacyCloudMapper.medicineToRow(tenantId, m)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += medicines.length;
     }
 
     if (debtCustomers.isNotEmpty) {
-      await c.from('pharmacy_customers').upsert(
-        [for (final x in debtCustomers) PharmacyCloudMapper.customerToRow(tenantId, x)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_customers',
+        rows: [for (final x in debtCustomers) PharmacyCloudMapper.customerToRow(tenantId, x)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += debtCustomers.length;
     }
 
     if (suppliers.isNotEmpty) {
-      await c.from('pharmacy_suppliers').upsert(
-        [for (final x in suppliers) PharmacyCloudMapper.supplierToRow(tenantId, x)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_suppliers',
+        rows: [for (final x in suppliers) PharmacyCloudMapper.supplierToRow(tenantId, x)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += suppliers.length;
     }
 
     if (sales.invoices.isNotEmpty) {
@@ -219,11 +223,12 @@ class PharmacyCloudRepository {
         returnCount: sales.returns.length,
       );
       try {
-        await c.from('pharmacy_sales').upsert(
-          [for (final inv in sales.invoices) PharmacyCloudMapper.saleToRow(tenantId, inv)],
+        rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+          client: c,
+          table: 'pharmacy_sales',
+          rows: [for (final inv in sales.invoices) PharmacyCloudMapper.saleToRow(tenantId, inv)],
           onConflict: 'tenant_id,client_id',
         );
-        rows += sales.invoices.length;
       } catch (e) {
         KpmsSyncLog.salePushResult(tenantId: tenantId, success: false, error: '$e');
         rethrow;
@@ -234,48 +239,53 @@ class PharmacyCloudRepository {
         itemRows.addAll(PharmacyCloudMapper.saleItemsToRows(tenantId, inv));
       }
       if (itemRows.isNotEmpty) {
-        await c.from('pharmacy_sale_items').upsert(
-          itemRows,
+        rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+          client: c,
+          table: 'pharmacy_sale_items',
+          rows: itemRows,
           onConflict: 'tenant_id,sale_client_id,line_client_id',
         );
-        rows += itemRows.length;
       }
     }
 
     if (sales.returns.isNotEmpty) {
-      await c.from('pharmacy_sale_returns').upsert(
-        [for (final r in sales.returns) PharmacyCloudMapper.saleReturnToRow(tenantId, r)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_sale_returns',
+        rows: [for (final r in sales.returns) PharmacyCloudMapper.saleReturnToRow(tenantId, r)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += sales.returns.length;
     }
 
     if (purchases.invoices.isNotEmpty) {
-      await c.from('pharmacy_purchases').upsert(
-        [for (final inv in purchases.invoices) PharmacyCloudMapper.purchaseToRow(tenantId, inv)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_purchases',
+        rows: [for (final inv in purchases.invoices) PharmacyCloudMapper.purchaseToRow(tenantId, inv)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += purchases.invoices.length;
 
       final itemRows = <Map<String, dynamic>>[];
       for (final inv in purchases.invoices) {
         itemRows.addAll(PharmacyCloudMapper.purchaseItemsToRows(tenantId, inv));
       }
       if (itemRows.isNotEmpty) {
-        await c.from('pharmacy_purchase_items').upsert(
-          itemRows,
+        rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+          client: c,
+          table: 'pharmacy_purchase_items',
+          rows: itemRows,
           onConflict: 'tenant_id,purchase_client_id,line_client_id',
         );
-        rows += itemRows.length;
       }
     }
 
     if (purchases.returns.isNotEmpty) {
-      await c.from('pharmacy_purchase_returns').upsert(
-        [for (final r in purchases.returns) PharmacyCloudMapper.purchaseReturnToRow(tenantId, r)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_purchase_returns',
+        rows: [for (final r in purchases.returns) PharmacyCloudMapper.purchaseReturnToRow(tenantId, r)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += purchases.returns.length;
     }
 
     if (sales.invoices.isNotEmpty) {

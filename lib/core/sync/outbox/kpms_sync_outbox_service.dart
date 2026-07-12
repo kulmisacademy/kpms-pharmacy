@@ -17,11 +17,31 @@ abstract final class KpmsSyncOutboxService {
     return steps[retryCount.clamp(0, steps.length - 1)];
   }
 
-  static Future<Database> _db() => KpmsSyncOutboxDb.instance;
+  /// Set once the local SQLite factory proves unavailable on this platform
+  /// (e.g. web / desktop without an `sqflite` ffi factory). When disabled the
+  /// outbox degrades to a no-op instead of crashing every caller — sync still
+  /// flows directly to Supabase; only the device-local durable retry queue is
+  /// skipped. Native mobile keeps full functionality.
+  static bool _disabled = false;
+
+  /// Returns the local DB, or `null` when SQLite is unavailable on this platform.
+  static Future<Database?> _dbOrNull() async {
+    if (_disabled) return null;
+    try {
+      return await KpmsSyncOutboxDb.instance;
+    } catch (e) {
+      if (!_disabled) {
+        _disabled = true;
+        KpmsSyncLog.syncRetry('local outbox disabled (sqflite unavailable): $e');
+      }
+      return null;
+    }
+  }
 
   /// Coalesce: one pending row per (tenant, entity_type) for bulk sync kinds.
   static Future<void> _coalescePending(String tenantId, String entityType) async {
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return;
     await db.delete(
       'kpms_sync_outbox',
       where: 'tenant_id = ? AND entity_type = ? AND sync_status = ?',
@@ -39,7 +59,8 @@ abstract final class KpmsSyncOutboxService {
     final tid = tenantId.trim();
     if (tid.isEmpty) return 0;
 
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return 0;
     if (coalesce && (entityType == KpmsSyncEntityType.workspace || entityType == KpmsSyncEntityType.enterprise)) {
       await _coalescePending(tid, entityType);
     }
@@ -64,7 +85,8 @@ abstract final class KpmsSyncOutboxService {
     final tid = tenantId.trim();
     if (tid.isEmpty) return const [];
 
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return const [];
     final now = DateTime.now().millisecondsSinceEpoch;
     final maps = await db.query(
       'kpms_sync_outbox',
@@ -79,7 +101,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<int> pendingCountForTenant(String tenantId) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return 0;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return 0;
     final r = await db.rawQuery(
       'SELECT COUNT(*) as c FROM kpms_sync_outbox WHERE tenant_id = ? AND sync_status = ?',
       [tid, KpmsSyncQueueStatus.pending],
@@ -90,7 +113,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<int> failedCountForTenant(String tenantId) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return 0;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return 0;
     final r = await db.rawQuery(
       'SELECT COUNT(*) as c FROM kpms_sync_outbox WHERE tenant_id = ? AND sync_status = ?',
       [tid, KpmsSyncQueueStatus.failed],
@@ -99,12 +123,14 @@ abstract final class KpmsSyncOutboxService {
   }
 
   static Future<void> deleteRow(int id) async {
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return;
     await db.delete('kpms_sync_outbox', where: 'id = ?', whereArgs: [id]);
   }
 
   static Future<void> scheduleRetry(int id, String error) async {
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return;
     final rows = await db.query('kpms_sync_outbox', where: 'id = ?', whereArgs: [id], limit: 1);
     if (rows.isEmpty) return;
 
@@ -147,7 +173,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<void> clearPendingBulkForTenant(String tenantId, {required String entityType}) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return;
     await db.delete(
       'kpms_sync_outbox',
       where: 'tenant_id = ? AND entity_type = ? AND sync_status = ?',
@@ -159,7 +186,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<int> totalRowsForTenant(String tenantId) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return 0;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return 0;
     final r = await db.rawQuery(
       'SELECT COUNT(*) as c FROM kpms_sync_outbox WHERE tenant_id = ?',
       [tid],
@@ -170,7 +198,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<bool> hasPendingRetriesForTenant(String tenantId) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return false;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return false;
     final r = await db.rawQuery(
       'SELECT COUNT(*) as c FROM kpms_sync_outbox WHERE tenant_id = ? AND sync_status = ? AND retry_count > 0',
       [tid, KpmsSyncQueueStatus.pending],
@@ -182,7 +211,8 @@ abstract final class KpmsSyncOutboxService {
   static Future<void> resetFailedForTenant(String tenantId) async {
     final tid = tenantId.trim();
     if (tid.isEmpty) return;
-    final db = await _db();
+    final db = await _dbOrNull();
+    if (db == null) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     await db.update(
       'kpms_sync_outbox',

@@ -13,6 +13,7 @@ import '../../../core/supabase/pharmacy_operational_gate.dart';
 import '../../../core/supabase/pharmacy_operational_warning_provider.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/sync/kpms_realtime_log.dart';
+import '../application/pharmacy_cloud_providers.dart';
 import '../../../providers/pharmacy_local_workspace.dart';
 import '../application/workspace_realtime_reconciler.dart';
 
@@ -190,8 +191,9 @@ class _PharmacyWorkspaceRealtimeHostState extends ConsumerState<PharmacyWorkspac
   Widget build(BuildContext context) {
     final tenantId = ref.watch(kpmsActiveTenantIdProvider).valueOrNull;
     final userId = ref.watch(supabaseAuthUserIdProvider).valueOrNull;
+    final bootstrapReady = ref.watch(pharmacyWorkspaceBootstrapReadyProvider);
 
-    if (tenantId == null || tenantId.isEmpty || userId == null || userId.isEmpty) {
+    if (tenantId == null || tenantId.isEmpty || userId == null || userId.isEmpty || !bootstrapReady) {
       if (_channel != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _teardownChannel();

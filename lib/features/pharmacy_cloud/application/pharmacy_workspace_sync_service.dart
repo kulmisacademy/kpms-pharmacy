@@ -279,6 +279,47 @@ class PharmacyWorkspaceSyncService {
     final localHas = _bundleHasBusinessData(localBundle);
 
     try {
+      final lastPull = await lastPullAt(tenantId);
+      final since = lastPull != null &&
+              localHas &&
+              DateTime.now().difference(lastPull) < const Duration(hours: 12)
+          ? lastPull
+          : null;
+
+      if (since != null) {
+        KpmsSyncLog.bootstrapPullMode(
+          tenantId: tenantId,
+          mode: 'incremental',
+          sinceIso: since.toUtc().toIso8601String(),
+        );
+        KpmsSyncLog.workspaceRestoreSource(tenantId: tenantId, source: 'incremental_bootstrap');
+        final delta = await _cloud.pullWorkspace(tenantId, changesSince: since);
+        if (delta != null) {
+          final merged = mergeCloudWithLocal(
+            cloud: delta,
+            local: localBundle,
+            tenantId: tenantId,
+          );
+          await markMigrated(tenantId);
+          await _writeLocalCache(tenantId, merged);
+          await _recordLastPull(tenantId);
+          KpmsSyncLog.cloudRestoreCompleted(tenantId: tenantId, hasData: _bundleHasBusinessData(merged));
+          if (_needsPushAfterMerge(delta, localBundle, merged)) {
+            KpmsSyncLog.uploadStarted(tenantId: tenantId);
+            await _cloud.pushWorkspace(
+              tenantId: tenantId,
+              medicines: merged.medicines,
+              sales: merged.sales,
+              purchases: merged.purchases,
+              debtCustomers: merged.debtCustomers,
+              suppliers: merged.suppliers,
+            );
+            KpmsSyncLog.uploadSuccess(tenantId: tenantId);
+          }
+          return merged;
+        }
+      }
+
       KpmsSyncLog.bootstrapPullMode(tenantId: tenantId, mode: 'full');
       KpmsSyncLog.workspaceRestoreSource(tenantId: tenantId, source: 'cloud_first_full_pull');
       final cloudBundle = await _cloud.pullWorkspace(tenantId);
@@ -290,9 +331,11 @@ class PharmacyWorkspaceSyncService {
         return localHas ? localBundle : null;
       }
 
-      final cloudHas = await _cloud.hasCloudData(tenantId);
       final cloudHasBusiness = _bundleHasBusinessData(cloudBundle);
-      final lastPull = await lastPullAt(tenantId);
+      final cloudHas = cloudHasBusiness ||
+          cloudBundle.medicines.isNotEmpty ||
+          cloudBundle.sales.invoices.isNotEmpty ||
+          cloudBundle.purchases.invoices.isNotEmpty;
 
       KpmsSyncLog.cloudPullCompleted(
         tenantId: tenantId,
@@ -399,6 +442,51 @@ class PharmacyWorkspaceSyncService {
     return _hasLocalOnlyMedicines(cloud.medicines, merged.medicines) ||
         _hasLocalOnlySales(cloud.sales, merged.sales) ||
         _hasLocalOnlyPurchases(cloud.purchases, merged.purchases);
+  }
+
+  /// Lightweight reconnect path — merges cloud deltas into current local bundle.
+  Future<PharmacyWorkspaceBundle?> incrementalRefreshWorkspace({
+    required String tenantId,
+    required List<Medicine> localMedicines,
+    required SalesLedgerState localSales,
+    required PurchaseLedgerState localPurchases,
+    required List<DebtCustomer> localDebtCustomers,
+    required List<Supplier> localSuppliers,
+  }) async {
+    final localBundle = (
+      medicines: localMedicines,
+      sales: localSales,
+      purchases: localPurchases,
+      debtCustomers: localDebtCustomers,
+      suppliers: localSuppliers,
+    );
+    final lastPull = await lastPullAt(tenantId);
+    if (lastPull == null) return null;
+    if (DateTime.now().difference(lastPull) > const Duration(hours: 12)) return null;
+
+    try {
+      KpmsSyncLog.bootstrapPullMode(
+        tenantId: tenantId,
+        mode: 'incremental',
+        sinceIso: lastPull.toUtc().toIso8601String(),
+      );
+      final delta = await _cloud.pullWorkspace(tenantId, changesSince: lastPull);
+      if (delta == null) return null;
+
+      final merged = mergeCloudWithLocal(
+        cloud: delta,
+        local: localBundle,
+        tenantId: tenantId,
+      );
+      await _writeLocalCache(tenantId, merged);
+      await _recordLastPull(tenantId);
+      KpmsSyncLog.workspaceRestoreSource(tenantId: tenantId, source: 'incremental_reconnect');
+      return merged;
+    } catch (e, st) {
+      debugPrint('PharmacyWorkspaceSyncService.incrementalRefresh failed: $e\n$st');
+      KpmsSyncLog.syncRetry('incremental_refresh: $e');
+      return null;
+    }
   }
 
   Future<void> pushToCloud({

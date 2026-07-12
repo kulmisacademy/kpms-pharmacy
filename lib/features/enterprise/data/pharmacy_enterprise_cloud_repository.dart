@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/performance/kpms_performance_log.dart';
+import '../../../core/supabase/kpms_supabase_chunked_upsert.dart';
 import '../../../core/supabase/kpms_supabase_paged_fetch.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/sync/kpms_sync_log.dart';
@@ -26,18 +27,23 @@ class PharmacyEnterpriseCloudRepository {
     KpmsSyncLog.pullStarted('enterprise:$tenantId');
 
     final sw = Stopwatch()..start();
-    final expenseRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_expenses',
-      tenantId: tenantId,
-    );
-    final categoryRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_medicine_categories',
-      tenantId: tenantId,
-    );
-    final barcodeRows = await KpmsSupabasePagedFetch.fetchAllForTenant(
-      table: 'pharmacy_product_barcodes',
-      tenantId: tenantId,
-    );
+    final results = await Future.wait([
+      KpmsSupabasePagedFetch.fetchAllForTenant(
+        table: 'pharmacy_expenses',
+        tenantId: tenantId,
+      ),
+      KpmsSupabasePagedFetch.fetchAllForTenant(
+        table: 'pharmacy_medicine_categories',
+        tenantId: tenantId,
+      ),
+      KpmsSupabasePagedFetch.fetchAllForTenant(
+        table: 'pharmacy_product_barcodes',
+        tenantId: tenantId,
+      ),
+    ]);
+    final expenseRows = results[0];
+    final categoryRows = results[1];
+    final barcodeRows = results[2];
     sw.stop();
     final rowEstimate = expenseRows.length + categoryRows.length + barcodeRows.length;
     KpmsPerformanceLog.pullCompleted(
@@ -80,27 +86,30 @@ class PharmacyEnterpriseCloudRepository {
     var rows = 0;
 
     if (expenses.isNotEmpty) {
-      await c.from('pharmacy_expenses').upsert(
-        [for (final e in expenses) PharmacyEnterpriseMapper.expenseToRow(tenantId, e, createdBy: createdBy)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_expenses',
+        rows: [for (final e in expenses) PharmacyEnterpriseMapper.expenseToRow(tenantId, e, createdBy: createdBy)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += expenses.length;
     }
 
     if (categories.isNotEmpty) {
-      await c.from('pharmacy_medicine_categories').upsert(
-        [for (final x in categories) PharmacyEnterpriseMapper.categoryToRow(tenantId, x)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_medicine_categories',
+        rows: [for (final x in categories) PharmacyEnterpriseMapper.categoryToRow(tenantId, x)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += categories.length;
     }
 
     if (barcodes.isNotEmpty) {
-      await c.from('pharmacy_product_barcodes').upsert(
-        [for (final b in barcodes) PharmacyEnterpriseMapper.barcodeToRow(tenantId, b)],
+      rows += await KpmsSupabaseChunkedUpsert.upsertAll(
+        client: c,
+        table: 'pharmacy_product_barcodes',
+        rows: [for (final b in barcodes) PharmacyEnterpriseMapper.barcodeToRow(tenantId, b)],
         onConflict: 'tenant_id,client_id',
       );
-      rows += barcodes.length;
     }
 
     KpmsSyncLog.uploadCompleted(tenantId: 'enterprise:$tenantId', rows: rows);

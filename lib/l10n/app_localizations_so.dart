@@ -434,11 +434,53 @@ class AppLocalizationsSo extends AppLocalizations {
   String get settingsPasswordSubtitle => 'Beddel erayga sirta ah ee akoonka';
 
   @override
-  String get settingsOptionalPinTitle => 'PIN / quful biometric';
+  String get settingsOptionalPinTitle => 'PIN-ka quful app-ka';
 
   @override
   String get settingsOptionalPinSubtitle =>
-      'Quful qalab oo ikhtiyaari ah — cusboonaysiin dambe';
+      'U baahan PIN si app-kan loogu furo qalabkan';
+
+  @override
+  String get appLockStatusOn => 'Shaqaynaya';
+
+  @override
+  String get appLockStatusOff => 'Damman';
+
+  @override
+  String get appLockEnterTitle => 'Geli PIN-ka';
+
+  @override
+  String get appLockEnterSubtitle => 'Fur KPMS si aad u sii wadato';
+
+  @override
+  String get appLockWrong => 'PIN qaldan';
+
+  @override
+  String get appLockSetTitle => 'Deji PIN';
+
+  @override
+  String get appLockSetSubtitle => 'Dooro PIN 4 ilaa 6 lambar ah';
+
+  @override
+  String get appLockConfirmTitle => 'Xaqiiji PIN-ka';
+
+  @override
+  String get appLockMismatch => 'PIN-yadu isma laha';
+
+  @override
+  String get appLockChange => 'Beddel PIN-ka';
+
+  @override
+  String get appLockRemove => 'Ka saar PIN-ka';
+
+  @override
+  String get appLockSetDone => 'PIN-ka quful app-ka waa la dejiyay';
+
+  @override
+  String get appLockRemoved => 'PIN-ka quful app-ka waa la saaray';
+
+  @override
+  String get appLockManageTitle => 'Quful app-ka';
 
   @override
   String get languageEnglish => 'Ingiriisi';

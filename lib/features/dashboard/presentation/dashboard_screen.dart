@@ -12,17 +12,53 @@ import '../../../core/responsive/responsive_breakpoints.dart';
 import '../../../core/widgets/kpms_page_shell.dart';
 import '../../../core/widgets/kpms_mobile_bottom_nav.dart';
 import '../../settings/application/pharmacy_settings_providers.dart';
-import '../../debts/application/debt_customers_notifier.dart';
-import '../../debts/application/supplier_payments_notifier.dart';
+import '../application/dashboard_providers.dart';
+import 'dashboard_loading_body.dart';
+import '../../../providers/pharmacy_local_workspace.dart';
 import '../../suppliers/application/suppliers_notifier.dart';
 import '../../analytics/application/sales_analytics_notifier.dart';
 import '../../medicines/data/medicine_catalog_notifier.dart';
 import '../../medicines/domain/medicine.dart';
-import '../../purchases/application/purchase_ledger_notifier.dart';
 import '../../sales/application/sales_ledger_notifier.dart';
 import '../../../core/widgets/kpms_empty_state.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_context.dart';
+
+({String title, String subtitle, IconData icon, Color accent, String route}) _mapActivityRow(
+  AppLocalizations l,
+  bool canFin,
+  DashboardActivityEntry e,
+  SuppliersNotifier suppliers,
+) {
+  return switch (e.kind) {
+    DashboardActivityKind.sale => (
+        title: l.dashRecentSaleTitle(e.refId),
+        subtitle: canFin
+            ? l.dashRecentSaleSubtitleWithAmount('\$${e.amount!.toStringAsFixed(2)}', e.detail)
+            : l.dashRecentSaleSubtitleNoAmount(e.detail),
+        icon: Icons.receipt_long_rounded,
+        accent: AppColors.tertiary,
+        route: e.route,
+      ),
+    DashboardActivityKind.purchase => (
+        title: l.dashRecentPurchaseTitle(e.refId),
+        subtitle: l.dashRecentPurchaseSubtitle(e.detail),
+        icon: Icons.local_shipping_rounded,
+        accent: AppColors.secondary,
+        route: e.route,
+      ),
+    DashboardActivityKind.supplierPayment => (
+        title: l.dashRecentSupplierPayment,
+        subtitle: l.dashRecentSupplierPaymentSubtitle(
+          suppliers.byId(e.refId)?.name ?? l.dashSupplierFallback,
+          '\$${e.amount!.toStringAsFixed(2)}',
+        ),
+        icon: Icons.account_balance_rounded,
+        accent: AppColors.primary,
+        route: e.route,
+      ),
+  };
+}
 
 /// Pharmacy home — KPI grid, session analytics, and activity (mobile-first layout).
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -75,110 +111,46 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with SingleTi
     final theme = Theme.of(context);
     final outline = theme.colorScheme.outline.withValues(alpha: 0.35);
     final analytics = ref.watch(salesAnalyticsProvider);
-    final canFin = ref.watch(kpmsCanViewFinancialMetricsProvider);
+    final canFin = ref.watch(dashboardCanViewFinancialProvider);
     final perm = ref.watch(kpmsPermissionContextProvider).valueOrNull;
     final lowStock = ref.watch(lowStockMedicinesProvider);
-    final meds = ref.watch(medicineCatalogProvider);
-    final salesLedger = ref.watch(salesLedgerProvider);
-    final purchaseLedger = ref.watch(purchaseLedgerProvider);
-    final debtCustomers = ref.watch(debtCustomersProvider);
-    final suppliers = ref.watch(suppliersProvider);
-    final supPay = ref.watch(supplierPaymentsProvider);
+    final medicineCount = ref.watch(medicineCatalogProvider.select((m) => m.length));
+    final salesEmpty = ref.watch(salesLedgerProvider.select((s) => s.invoices.isEmpty));
+    final debtSummary = ref.watch(dashboardDebtSummaryProvider);
+    final catalogInsights = ref.watch(dashboardCatalogInsightsProvider);
+    final chartData = ref.watch(dashboardChartDataProvider);
+    final recentActivity = ref.watch(dashboardRecentActivityProvider);
+    final bootstrapReady = ref.watch(dashboardBootstrapReadyProvider);
+    final bootstrapAsync = ref.watch(pharmacyWorkspaceBootstrapProvider);
+    final showDashboardSkeleton = medicineCount == 0 &&
+        salesEmpty &&
+        (!bootstrapReady || bootstrapAsync.isLoading);
 
-    final ledger = ref.read(salesLedgerProvider.notifier);
-    var customerDebtTotal = 0.0;
-    for (final c in debtCustomers) {
-      customerDebtTotal += ledger.openDebtTotalForCustomer(c.id);
-    }
-    final supplierDebtTotal = suppliers.fold(0.0, (s, x) => s + x.balanceOwed);
+    final customerDebtTotal = debtSummary.customerDebtTotal;
+    final supplierDebtTotal = debtSummary.supplierDebtTotal;
     final suppliersNotifier = ref.read(suppliersProvider.notifier);
+    final expiringSoonCount = catalogInsights.expiringSoonCount;
+    final pharmacyName = ref.watch(pharmacyBrandingProvider.select((b) => b.businessName));
 
-    final recentItems = <({DateTime at, String title, String subtitle, IconData icon, Color accent, String route})>[];
-    for (final inv in salesLedger.invoices.take(40)) {
-      recentItems.add((
-        at: inv.issuedAt,
-        title: l.dashRecentSaleTitle(inv.invoiceNumber),
-        subtitle: canFin
-            ? l.dashRecentSaleSubtitleWithAmount('\$${inv.total.toStringAsFixed(2)}', inv.paymentMethod)
-            : l.dashRecentSaleSubtitleNoAmount(inv.paymentMethod),
-        icon: Icons.receipt_long_rounded,
-        accent: AppColors.tertiary,
-        route: AppRoutes.pos,
-      ));
+    if (showDashboardSkeleton) {
+      return KpmsPageShell(
+        title: l.dashboardTitle,
+        subtitle: l.dashboardSubtitleOverview,
+        body: const DashboardLoadingBody(),
+      );
     }
-    for (final p in purchaseLedger.invoices.take(40)) {
-      recentItems.add((
-        at: p.issuedAt,
-        title: l.dashRecentPurchaseTitle(p.invoiceNumber),
-        subtitle: l.dashRecentPurchaseSubtitle(p.supplierName),
-        icon: Icons.local_shipping_rounded,
-        accent: AppColors.secondary,
-        route: AppRoutes.purchases,
-      ));
-    }
-    for (final pay in supPay.take(30)) {
-      final sup = suppliersNotifier.byId(pay.supplierId);
-      recentItems.add((
-        at: pay.paidAt,
-        title: l.dashRecentSupplierPayment,
-        subtitle: l.dashRecentSupplierPaymentSubtitle(sup?.name ?? l.dashSupplierFallback, '\$${pay.amount.toStringAsFixed(2)}'),
-        icon: Icons.account_balance_rounded,
-        accent: AppColors.primary,
-        route: '${AppRoutes.supplierFinance}/${pay.supplierId}',
-      ));
-    }
-    recentItems.sort((a, b) => b.at.compareTo(a.at));
-    final recentRows = recentItems
+
+    final recentRows = recentActivity
         .where((e) => _routeAllowed(perm, e.route))
-        .take(12)
-        .map(
-          (e) => (
-            title: e.title,
-            subtitle: e.subtitle,
-            icon: e.icon,
-            accent: e.accent,
-            route: e.route,
-          ),
-        )
+        .map((e) => _mapActivityRow(l, canFin, e, suppliersNotifier))
         .toList(growable: false);
 
-    final salesSpotsRaw = analytics.dailySeries.isNotEmpty
-        ? [for (var i = 0; i < analytics.dailySeries.length; i++) FlSpot(i.toDouble(), analytics.dailySeries[i])]
-        : (analytics.dailyTotal > 0.009 ? [FlSpot(0, analytics.dailyTotal)] : <FlSpot>[]);
-    final salesSpots = canFin ? salesSpotsRaw : <FlSpot>[];
-
-    final monthlySpotsRaw = analytics.monthlySeries.isNotEmpty
-        ? [for (var i = 0; i < analytics.monthlySeries.length; i++) FlSpot(i.toDouble(), analytics.monthlySeries[i])]
-        : (analytics.monthlyTotal > 0.009 ? [FlSpot(0, analytics.monthlyTotal)] : <FlSpot>[]);
-    final monthlySpots = canFin ? monthlySpotsRaw : <FlSpot>[];
-
-    final barGroups = [
-      for (var i = 0; i < analytics.topSelling.length && i < 5; i++)
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: analytics.topSelling[i].$2.toDouble().clamp(0, 1e9),
-              color: AppColors.primary,
-              width: 10,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-            ),
-          ],
-        ),
-    ];
-    final barLabels = [
-      for (var i = 0; i < analytics.topSelling.length && i < 5; i++)
-        analytics.topSelling[i].$1.length > 12 ? '${analytics.topSelling[i].$1.substring(0, 11)}…' : analytics.topSelling[i].$1,
-    ];
-
-    final showPerfCharts = salesSpots.isNotEmpty || barGroups.isNotEmpty;
-    final expiringSoon = meds.where((m) {
-      final e = m.expiryDate;
-      if (e == null) return false;
-      return e.difference(DateTime.now()).inDays <= 90;
-    }).length;
-
-    final pharmacyName = ref.watch(pharmacyBrandingProvider).businessName;
+    final salesSpots = chartData.salesSpots;
+    final monthlySpots = chartData.monthlySpots;
+    final barGroups = chartData.barGroups;
+    final barLabels = chartData.barLabels;
+    final showPerfCharts = chartData.showPerfCharts;
+    final expiringSoon = expiringSoonCount;
 
     return KpmsPageShell(
       title: l.dashboardTitle,
@@ -200,7 +172,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with SingleTi
                     perm: perm,
                     canFin: canFin,
                     analytics: analytics,
-                    medicineCount: meds.length,
+                    medicineCount: medicineCount,
                     lowStockCount: lowStock.length,
                     expiringSoonCount: expiringSoon,
                     customerCreditTotal: customerDebtTotal,

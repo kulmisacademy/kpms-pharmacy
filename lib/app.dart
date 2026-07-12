@@ -12,8 +12,8 @@ import 'providers/app_locale_provider.dart';
 import 'core/tenant/pharmacy_tenant_isolation_host.dart';
 import 'core/push/kpms_push_messaging.dart';
 import 'features/notifications/presentation/kpms_operational_notifications_host.dart';
+import 'features/pharmacy_cloud/presentation/pharmacy_workspace_bootstrap_host.dart';
 import 'features/pharmacy_cloud/presentation/pharmacy_workspace_realtime_host.dart';
-import 'features/enterprise/application/pharmacy_enterprise_bootstrap.dart';
 import 'providers/pharmacy_local_workspace.dart';
 import 'providers/theme_provider.dart';
 import 'routes/app_router.dart';
@@ -30,8 +30,6 @@ class KpmsApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(appLocaleProvider);
-    ref.watch(pharmacyWorkspaceBootstrapProvider);
-    ref.watch(pharmacyEnterpriseBootstrapProvider);
 
     return MaterialApp.router(
       title: 'KULMIS KPMS',
@@ -46,7 +44,7 @@ class KpmsApp extends ConsumerWidget {
       builder: (context, child) {
         return PharmacyTenantIsolationHost(
           child: KpmsStaffSessionBootstrapHost(
-            child: PharmacyAuthIsolationListener(
+            child: PharmacyWorkspaceBootstrapHost(
               child: KpmsAuthRecoveryHost(
                 child: PharmacyWorkspaceRealtimeHost(
                   child: KpmsOperationalNotificationsHost(

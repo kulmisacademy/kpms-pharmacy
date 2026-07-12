@@ -12,6 +12,7 @@ import '../../sales/application/sales_ledger_notifier.dart';
 import '../../suppliers/application/suppliers_notifier.dart';
 import '../application/debt_customers_notifier.dart';
 import '../application/supplier_payments_notifier.dart';
+import '../../dashboard/application/dashboard_providers.dart';
 
 class DebtsDashboardScreen extends ConsumerWidget {
   const DebtsDashboardScreen({super.key});
@@ -19,24 +20,16 @@ class DebtsDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    ref.watch(salesLedgerProvider);
-    ref.watch(suppliersProvider);
-    ref.watch(purchaseLedgerProvider);
-    ref.watch(debtCustomersProvider);
-    ref.watch(supplierPaymentsProvider);
+    final debtSummary = ref.watch(dashboardDebtSummaryProvider);
     final clearance = KpmsMobileBottomNav.scrollClearanceBottom(context);
 
     final ledger = ref.read(salesLedgerProvider.notifier);
     final customers = ref.read(debtCustomersProvider);
-    final suppliers = ref.read(suppliersProvider);
-    final purchases = ref.read(purchaseLedgerProvider).invoices;
-    final supPay = ref.read(supplierPaymentsProvider);
+    final purchases = ref.watch(purchaseLedgerProvider).invoices;
+    final supPay = ref.watch(supplierPaymentsProvider);
 
-    var customerDebtTotal = 0.0;
-    for (final c in customers) {
-      customerDebtTotal += ledger.openDebtTotalForCustomer(c.id);
-    }
-    final supplierDebtTotal = suppliers.fold(0.0, (s, x) => s + x.balanceOwed);
+    final customerDebtTotal = debtSummary.customerDebtTotal;
+    final supplierDebtTotal = debtSummary.supplierDebtTotal;
 
     final openSaleInvoices = ref
         .read(salesLedgerProvider)

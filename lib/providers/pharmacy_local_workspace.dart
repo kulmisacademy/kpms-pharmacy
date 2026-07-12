@@ -230,7 +230,8 @@ final pharmacyWorkspaceBootstrapProvider = FutureProvider<void>((ref) async {
   }
 });
 
-/// Back-compat alias.
+/// Back-compat alias — prefer [pharmacyWorkspaceBootstrapProvider].
+@Deprecated('Use pharmacyWorkspaceBootstrapProvider')
 final pharmacyLocalBootstrapProvider = pharmacyWorkspaceBootstrapProvider;
 
 /// Debounced local cache + cloud push (tenant-scoped only).
@@ -415,13 +416,44 @@ class _PharmacyWorkspaceAutoSaveHostState extends ConsumerState<PharmacyWorkspac
       if (_connectivityOffline) {
         _connectivityOffline = false;
         KpmsSyncLog.reconnectDetected();
-        KpmsSyncLog.syncRetry('connectivity_restored: pull cloud then flush outbox');
+        KpmsSyncLog.syncRetry('connectivity_restored: incremental pull then flush outbox');
         unawaited(_refreshSyncUi());
-        ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
-        ref.invalidate(pharmacyWorkspaceBootstrapProvider);
+        unawaited(_incrementalRefreshAfterReconnect());
         _scheduleOutboxReplay();
       }
     });
+  }
+
+  Future<void> _incrementalRefreshAfterReconnect() async {
+    if (!mounted || !_bootstrapReady) return;
+    final tid = _activeTenantId ?? ref.read(kpmsActiveTenantIdProvider).valueOrNull;
+    final uid = _activeUserId ?? ref.read(supabaseAuthUserIdProvider).valueOrNull;
+    if (tid == null || tid.isEmpty || uid == null) return;
+
+    final merged = await ref.read(pharmacyWorkspaceSyncServiceProvider).incrementalRefreshWorkspace(
+          tenantId: tid,
+          localMedicines: ref.read(medicineCatalogProvider),
+          localSales: ref.read(salesLedgerProvider),
+          localPurchases: ref.read(purchaseLedgerProvider),
+          localDebtCustomers: ref.read(debtCustomersProvider),
+          localSuppliers: ref.read(suppliersProvider),
+        );
+
+    if (!mounted) return;
+    if (merged != null) {
+      ensureWorkspaceTenantBoundary(ref, userId: uid, tenantId: tid);
+      ref.read(medicineCatalogProvider.notifier).replaceAll(merged.medicines);
+      ref.read(salesLedgerProvider.notifier).hydrate(merged.sales);
+      ref.read(purchaseLedgerProvider.notifier).hydrate(merged.purchases);
+      ref.read(debtCustomersProvider.notifier).replaceAll(merged.debtCustomers);
+      ref.read(suppliersProvider.notifier).replaceAll(merged.suppliers);
+      ref.read(salesAnalyticsProvider.notifier).rebuildFromLedger(merged.sales, tenantId: tid);
+      KpmsTenantLog.workspaceLoaded(tid);
+      return;
+    }
+
+    ref.read(pharmacyWorkspaceBootstrapReadyProvider.notifier).state = false;
+    ref.invalidate(pharmacyWorkspaceBootstrapProvider);
   }
 
   void _schedulePersist() {

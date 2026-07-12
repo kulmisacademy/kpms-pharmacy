@@ -15,10 +15,25 @@ ThemeData kpmsLightReceiptHostTheme(BuildContext context) {
     surface: AppColors.surfaceCard,
     surfaceContainerHighest: AppColors.surfacePage,
   );
+  // The host (often dark) textTheme carries light-on-dark text colors. Without
+  // re-coloring it, any Text that relies on the default textTheme color renders
+  // near-white on the white receipt card and disappears. Re-apply dark-on-light
+  // colors so every receipt label is legible regardless of the app's brightness.
+  final textTheme = host.textTheme.apply(
+    bodyColor: scheme.onSurface,
+    displayColor: scheme.onSurface,
+  );
+  final primaryTextTheme = host.primaryTextTheme.apply(
+    bodyColor: scheme.onSurface,
+    displayColor: scheme.onSurface,
+  );
+
   return host.copyWith(
     brightness: Brightness.light,
     colorScheme: scheme,
     scaffoldBackgroundColor: AppColors.surfaceCard,
+    textTheme: textTheme,
+    primaryTextTheme: primaryTextTheme,
     dividerTheme: DividerThemeData(color: scheme.outline.withValues(alpha: 0.12)),
   );
 }

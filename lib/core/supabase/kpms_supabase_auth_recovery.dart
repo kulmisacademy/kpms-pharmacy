@@ -52,7 +52,16 @@ abstract final class KpmsSupabaseAuthRecovery {
     await Future<void>.delayed(debounce);
     final client = SupabaseBootstrap.clientOrNull;
     if (client == null) return;
-    if (client.auth.currentSession == null) return;
+    final session = client.auth.currentSession;
+    if (session == null) return;
+
+    // The supabase_flutter SDK already auto-refreshes the token on resume. Calling
+    // refreshSession() in parallel rotates the refresh token and can collide with the
+    // SDK's in-flight refresh — the loser uses an already-rotated token, GoTrue returns
+    // 400, and the user is signed out unexpectedly. So only refresh when the access
+    // token has genuinely expired (nothing valid left to collide with); otherwise let
+    // the SDK handle it silently.
+    if (!session.isExpired) return;
 
     final now = DateTime.now();
     if (_lastResumeRefresh != null && now.difference(_lastResumeRefresh!) < minInterval) {

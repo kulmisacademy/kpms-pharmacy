@@ -45,7 +45,7 @@ class SyncIntegritySnapshot {
   final bool bootstrapReady;
 }
 
-final syncIntegrityDiagnosticsProvider = FutureProvider<SyncIntegritySnapshot?>((ref) async {
+final syncIntegrityDiagnosticsProvider = FutureProvider.autoDispose<SyncIntegritySnapshot?>((ref) async {
   final tenantId = await ref.watch(kpmsActiveTenantIdProvider.future);
   if (tenantId == null || tenantId.isEmpty) return null;
 

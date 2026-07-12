@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_prefs_keys.dart';
 import '../../../core/constants/app_routes.dart';
+import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 
@@ -44,6 +45,8 @@ class _BrandingScreenState extends State<BrandingScreen> with SingleTickerProvid
     scheduleMicrotask(() async {
       await Future<void>.delayed(const Duration(milliseconds: 2600));
       if (!mounted) return;
+      // Authenticated users are redirected by GoRouter — do not force login.
+      if (SupabaseBootstrap.clientOrNull?.auth.currentSession != null) return;
       final prefs = await SharedPreferences.getInstance();
       final onboardingDone = prefs.getBool(AppPrefsKeys.onboardingCompleted) ?? false;
       if (!mounted) return;

@@ -201,7 +201,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final canManageCatalog = ref.watch(kpmsCanManageInventoryProvider);
     final bootstrapReady = ref.watch(pharmacyWorkspaceBootstrapReadyProvider);
     final bootstrapAsync = ref.watch(pharmacyWorkspaceBootstrapProvider);
-    final showCatalogSkeleton = meds.isEmpty && (!bootstrapReady || bootstrapAsync.isLoading);
+    final catalogCount = ref.watch(medicineCatalogProvider.select((m) => m.length));
+    final showCatalogSkeleton = catalogCount == 0 && (!bootstrapReady || bootstrapAsync.isLoading);
     final catalog = _PosCatalogPane(
       controller: _search,
       viewMode: _viewMode,

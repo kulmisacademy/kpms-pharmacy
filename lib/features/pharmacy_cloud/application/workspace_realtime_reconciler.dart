@@ -38,12 +38,20 @@ class WorkspaceRealtimeReconciler {
   final Map<String, Timer> _saleRefetchTimers = {};
   final Map<String, Timer> _purchaseRefetchTimers = {};
 
+  /// Serial FIFO chain so realtime events apply strictly in arrival
+  /// (commit) order. Without this, each event was dispatched via
+  /// `unawaited(...)` and async handlers (with awaited refetches) could
+  /// interleave, letting a stale snapshot overwrite a newer one.
+  Future<void> _queue = Future<void>.value();
+  bool _disposed = false;
+
   WorkspaceRealtimePersistScheduler get _persist =>
       _ref.read(workspaceRealtimePersistSchedulerProvider);
 
   PharmacyCloudRepository get _cloud => _ref.read(pharmacyCloudRepositoryProvider);
 
   void dispose() {
+    _disposed = true;
     for (final t in _saleRefetchTimers.values) {
       t.cancel();
     }
@@ -89,7 +97,41 @@ class WorkspaceRealtimeReconciler {
       };
 
   /// Entry point from [PharmacyWorkspaceRealtimeHost].
+  ///
+  /// Events are chained on a single serial queue so they apply in the exact
+  /// order they were received (the realtime channel delivers them in commit
+  /// order). This prevents out-of-order patches where a slower handler for an
+  /// earlier event would otherwise finish after a later one.
   Future<void> onPostgresChange({
+    required String table,
+    required String tenantId,
+    required PostgresChangePayload payload,
+  }) {
+    if (_disposed) return Future<void>.value();
+    final next = _queue.then((_) {
+      if (_disposed) return Future<void>.value();
+      return _processChange(table: table, tenantId: tenantId, payload: payload);
+    });
+    // Keep the chain alive even if one handler throws.
+    _queue = next.catchError((Object e, StackTrace s) {
+      KpmsWorkspaceLog.patchSkipped(reason: 'reconcile_error', detail: '$table: $e');
+    });
+    return next;
+  }
+
+  /// Chain arbitrary realtime-driven work onto the serial queue so it never
+  /// interleaves with [onPostgresChange] handlers (used by debounced refetches).
+  void _enqueue(Future<void> Function() work) {
+    if (_disposed) return;
+    _queue = _queue.then((_) {
+      if (_disposed) return Future<void>.value();
+      return work();
+    }).catchError((Object e, StackTrace s) {
+      KpmsWorkspaceLog.patchSkipped(reason: 'reconcile_error', detail: 'refetch: $e');
+    });
+  }
+
+  Future<void> _processChange({
     required String table,
     required String tenantId,
     required PostgresChangePayload payload,
@@ -160,7 +202,7 @@ class WorkspaceRealtimeReconciler {
     _saleRefetchTimers[saleClientId]?.cancel();
     _saleRefetchTimers[saleClientId] = Timer(const Duration(milliseconds: 350), () {
       _saleRefetchTimers.remove(saleClientId);
-      unawaited(_fetchAndPatchSale(tenantId, saleClientId));
+      _enqueue(() => _fetchAndPatchSale(tenantId, saleClientId));
     });
   }
 
@@ -169,7 +211,7 @@ class WorkspaceRealtimeReconciler {
     _purchaseRefetchTimers[purchaseClientId]?.cancel();
     _purchaseRefetchTimers[purchaseClientId] = Timer(const Duration(milliseconds: 350), () {
       _purchaseRefetchTimers.remove(purchaseClientId);
-      unawaited(_fetchAndPatchPurchase(tenantId, purchaseClientId));
+      _enqueue(() => _fetchAndPatchPurchase(tenantId, purchaseClientId));
     });
   }
 
@@ -269,6 +311,15 @@ class WorkspaceRealtimeReconciler {
 
     final inv = PharmacyCloudMapper.saleFromRows(row, const []);
     if (inv == null || inv.lines.isEmpty) {
+      final existing = _ref.read(salesLedgerProvider.notifier).invoiceByNumber(clientId);
+      if (existing != null && existing.lines.isNotEmpty) {
+        KpmsRealtimeLog.duplicateIgnored(
+          table: 'pharmacy_sales',
+          clientId: clientId,
+          reason: 'header_without_items_existing_complete',
+        );
+        return;
+      }
       _scheduleSaleRefetch(tenantId, clientId);
       return;
     }
@@ -370,6 +421,15 @@ class WorkspaceRealtimeReconciler {
 
     final inv = PharmacyCloudMapper.purchaseFromRows(row, const []);
     if (inv == null || inv.lines.isEmpty) {
+      final existing = _ref.read(purchaseLedgerProvider.notifier).invoiceByNumber(clientId);
+      if (existing != null && existing.lines.isNotEmpty) {
+        KpmsRealtimeLog.duplicateIgnored(
+          table: 'pharmacy_purchases',
+          clientId: clientId,
+          reason: 'header_without_items_existing_complete',
+        );
+        return;
+      }
       _schedulePurchaseRefetch(tenantId, clientId);
       return;
     }

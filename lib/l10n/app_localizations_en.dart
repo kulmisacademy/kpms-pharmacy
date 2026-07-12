@@ -432,11 +432,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPasswordSubtitle => 'Change password for this account';
 
   @override
-  String get settingsOptionalPinTitle => 'PIN / biometric lock';
+  String get settingsOptionalPinTitle => 'App lock PIN';
 
   @override
   String get settingsOptionalPinSubtitle =>
-      'Optional device lock — coming in a future update';
+      'Require a PIN to open this app on this device';
+
+  @override
+  String get appLockStatusOn => 'On';
+
+  @override
+  String get appLockStatusOff => 'Off';
+
+  @override
+  String get appLockEnterTitle => 'Enter PIN';
+
+  @override
+  String get appLockEnterSubtitle => 'Unlock KPMS to continue';
+
+  @override
+  String get appLockWrong => 'Incorrect PIN';
+
+  @override
+  String get appLockSetTitle => 'Set a PIN';
+
+  @override
+  String get appLockSetSubtitle => 'Choose a 4 to 6 digit PIN';
+
+  @override
+  String get appLockConfirmTitle => 'Confirm PIN';
+
+  @override
+  String get appLockMismatch => 'PINs do not match';
+
+  @override
+  String get appLockChange => 'Change PIN';
+
+  @override
+  String get appLockRemove => 'Remove PIN';
+
+  @override
+  String get appLockSetDone => 'App lock PIN enabled';
+
+  @override
+  String get appLockRemoved => 'App lock PIN removed';
+
+  @override
+  String get appLockManageTitle => 'App lock';
 
   @override
   String get languageEnglish => 'English';

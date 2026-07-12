@@ -432,11 +432,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPasswordSubtitle => 'تغيير كلمة مرور هذا الحساب';
 
   @override
-  String get settingsOptionalPinTitle => 'قفل PIN / القياسات الحيوية';
+  String get settingsOptionalPinTitle => 'رمز قفل التطبيق';
 
   @override
   String get settingsOptionalPinSubtitle =>
-      'قفل اختياري للجهاز — في تحديث لاحق';
+      'طلب رمز PIN لفتح التطبيق على هذا الجهاز';
+
+  @override
+  String get appLockStatusOn => 'مُفعّل';
+
+  @override
+  String get appLockStatusOff => 'مُعطّل';
+
+  @override
+  String get appLockEnterTitle => 'أدخل الرمز';
+
+  @override
+  String get appLockEnterSubtitle => 'افتح KPMS للمتابعة';
+
+  @override
+  String get appLockWrong => 'رمز غير صحيح';
+
+  @override
+  String get appLockSetTitle => 'تعيين رمز';
+
+  @override
+  String get appLockSetSubtitle => 'اختر رمزًا من 4 إلى 6 أرقام';
+
+  @override
+  String get appLockConfirmTitle => 'تأكيد الرمز';
+
+  @override
+  String get appLockMismatch => 'الرمزان غير متطابقين';
+
+  @override
+  String get appLockChange => 'تغيير الرمز';
+
+  @override
+  String get appLockRemove => 'إزالة الرمز';
+
+  @override
+  String get appLockSetDone => 'تم تفعيل رمز قفل التطبيق';
+
+  @override
+  String get appLockRemoved => 'تمت إزالة رمز قفل التطبيق';
+
+  @override
+  String get appLockManageTitle => 'قفل التطبيق';
 
   @override
   String get languageEnglish => 'الإنجليزية';

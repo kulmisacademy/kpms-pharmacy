@@ -35,20 +35,21 @@ class KpmsPageShell extends ConsumerWidget {
   final List<Widget> actions;
   final bool constrainContentWidth;
 
-  String _workspaceHome(WidgetRef ref) {
-    final perm = ref.read(kpmsPermissionContextProvider).valueOrNull;
-    return perm?.defaultLandingRoute ?? AppRoutes.home;
-  }
-
-  bool _canNotify(WidgetRef ref) {
-    final perm = ref.read(kpmsPermissionContextProvider).valueOrNull;
-    return perm == null || perm.canAccessLocation(AppRoutes.notifications);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final perm = ref.watch(kpmsPermissionContextProvider).valueOrNull;
-    final isPlatformSuperAdmin = perm?.isPlatformSuperAdmin == true;
+    final isPlatformSuperAdmin = ref.watch(
+      kpmsPermissionContextProvider.select((a) => a.valueOrNull?.isPlatformSuperAdmin == true),
+    );
+    final canNotify = ref.watch(
+      kpmsPermissionContextProvider.select(
+        (a) => a.valueOrNull?.canAccessLocation(AppRoutes.notifications) ?? true,
+      ),
+    );
+    final workspaceHome = ref.watch(
+      kpmsPermissionContextProvider.select(
+        (a) => a.valueOrNull?.defaultLandingRoute ?? AppRoutes.home,
+      ),
+    );
 
     if (isDesktop(context) && !isPlatformSuperAdmin) {
       return DesktopShell(
@@ -68,8 +69,8 @@ class KpmsPageShell extends ConsumerWidget {
       actions: actions,
       floatingActionButton: floatingActionButton,
       constrainContentWidth: constrainContentWidth,
-      workspaceHome: _workspaceHome(ref),
-      canNotify: _canNotify(ref),
+      workspaceHome: workspaceHome,
+      canNotify: canNotify,
       useTabletDrawer: isTablet(context) && !isPlatformSuperAdmin,
     );
   }
